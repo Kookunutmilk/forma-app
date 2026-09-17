@@ -88,12 +88,65 @@ fun RoutineScreen(
                 modifier = Modifier.align(Alignment.Center),
             )
 
-            is RoutineUiState.Content -> RoutineContent(
-                state = current,
-                viewModel = viewModel,
-                onFinishWorkout = onFinishWorkout,
-            )
+            is RoutineUiState.Content -> {
+                RoutineContent(
+                    state = current,
+                    viewModel = viewModel,
+                    onFinishWorkout = onFinishWorkout,
+                )
+                current.restTimer?.let { timer ->
+                    FloatingRestTimer(
+                        timer = timer,
+                        onStop = viewModel::stopTimer,
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(horizontal = 20.dp)
+                            .padding(bottom = BottomBarSpacing - 16.dp),
+                    )
+                }
+            }
         }
+    }
+}
+
+/** Mientras corre el descanso el temporizador flota sobre la lista para no perderlo de vista. */
+@Composable
+private fun FloatingRestTimer(
+    timer: RestTimer,
+    onStop: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    FormaCard(
+        modifier = modifier,
+        color = FormaLimeSoft,
+        contentPadding = PaddingValues(16.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Rounded.Timer,
+                contentDescription = null,
+                tint = FormaLime,
+                modifier = Modifier.size(22.dp),
+            )
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(
+                    text = "Descanso",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = FormaLime,
+                )
+                Text(
+                    text = formatSeconds(timer.remainingSeconds),
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = FormaOnBackground,
+                )
+            }
+            TextButton(onClick = onStop) {
+                Text("Detener", color = FormaMuted, style = MaterialTheme.typography.titleSmall)
+            }
+        }
+        Spacer(Modifier.height(10.dp))
+        FormaProgressBar(progress = timer.progress)
     }
 }
 
@@ -154,7 +207,8 @@ private fun RoutineContent(
             contentPadding = PaddingValues(
                 start = 20.dp,
                 end = 20.dp,
-                bottom = BottomBarSpacing,
+                // Deja sitio para el temporizador flotante mientras corre el descanso.
+                bottom = BottomBarSpacing + if (state.restTimer != null) 104.dp else 0.dp,
             ),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -174,7 +228,7 @@ private fun RoutineContent(
 
             item {
                 RestTimerCard(
-                    timer = state.restTimer,
+                    timer = null,
                     defaultSeconds = session.exercises.firstOrNull()?.restSeconds ?: 90,
                     onStart = viewModel::startTimer,
                     onStop = viewModel::stopTimer,

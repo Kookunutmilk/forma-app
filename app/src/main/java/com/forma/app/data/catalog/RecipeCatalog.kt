@@ -772,7 +772,157 @@ object RecipeCatalog {
         ),
     )
 
-    val all: List<Recipe> = breakfasts + lunches + snacks + dinners
+    /**
+     * Platos de mayor aporte calórico. Sin ellos, un objetivo alto (ganar músculo con volumen de
+     * entrenamiento) no se alcanza aunque se elijan las opciones más grandes de cada comida.
+     */
+    private val hearty = listOf(
+        recipe(
+            "b_hotcakes_avena_proteina", "Hotcakes de avena con plátano y crema de cacahuate",
+            "\uD83E\uDD5E", MealSlot.BREAKFAST,
+            700, 42, 82, 22, 18, "food_pancakes",
+            listOf(
+                ing("avena", "90 g"),
+                ing("huevo", "2 piezas"),
+                ing("proteina_polvo", "1 scoop"),
+                ing("platano", "1 pieza"),
+                ing("cacahuate", "20 g"),
+            ),
+            listOf(
+                "Licua la avena, el huevo, la proteína y medio plátano hasta tener una mezcla espesa.",
+                "Cocina porciones en sartén antiadherente a fuego medio-bajo, 2 minutos por lado.",
+                "Apila los hotcakes y cubre con el resto del plátano en rodajas.",
+                "Termina con la crema de cacahuate tibia para que se escurra.",
+            ),
+        ),
+        recipe(
+            "b_burrito_grande", "Burrito de huevo, frijol y aguacate", "\uD83C\uDF2F",
+            MealSlot.BREAKFAST,
+            660, 38, 62, 28, 15, "food_burrito",
+            listOf(
+                ing("huevo", "3 piezas"),
+                ing("frijoles", "150 g"),
+                ing("tortilla", "2 piezas grandes"),
+                ing("aguacate", "1/2 pieza"),
+                ing("queso_panela", "50 g"),
+            ),
+            listOf(
+                "Revuelve el huevo con un poco de jitomate y cebolla.",
+                "Calienta los frijoles hasta que queden espesos y untables.",
+                "Calienta las tortillas y rellénalas con frijol, huevo y panela.",
+                "Agrega aguacate, enrolla apretado y dora el burrito 1 minuto por lado.",
+            ),
+        ),
+        recipe(
+            "l_arroz_res_completo", "Arroz con res, verduras y aguacate", "\uD83E\uDD69",
+            MealSlot.LUNCH,
+            920, 62, 96, 30, 30, "food_steak",
+            listOf(
+                ing("res", "220 g"),
+                ing("arroz", "150 g en crudo"),
+                ing("pimiento", "1 pieza"),
+                ing("brocoli", "150 g"),
+                ing("aguacate", "1/2 pieza"),
+            ),
+            listOf(
+                "Cocina el arroz con caldo y un diente de ajo para que tome sabor.",
+                "Sella la res en trozos a fuego alto 4 minutos; resérvala tapada.",
+                "Saltea el pimiento y el brócoli en el mismo sartén, 5 minutos.",
+                "Sirve el arroz, encima la res con sus jugos y el aguacate en rebanadas.",
+            ),
+        ),
+        recipe(
+            "l_pasta_salmon_grande", "Pasta integral con salmón y crema de aguacate",
+            "\uD83C\uDF5D", MealSlot.LUNCH,
+            880, 52, 88, 34, 25, "food_pasta",
+            listOf(
+                ing("pasta", "140 g en crudo"),
+                ing("salmon", "180 g"),
+                ing("aguacate", "1 pieza"),
+                ing("espinaca", "100 g"),
+                ing("aceite_oliva", "1 cda"),
+            ),
+            listOf(
+                "Cuece la pasta al dente y guarda media taza del agua de cocción.",
+                "Sella el salmón 3 minutos por lado y desmenúzalo en trozos grandes.",
+                "Licua el aguacate con limón, ajo y el agua de la pasta hasta tener una crema.",
+                "Mezcla todo con la espinaca fresca: el calor de la pasta la suaviza.",
+            ),
+        ),
+        recipe(
+            "l_bowl_pollo_doble", "Bowl doble de pollo, quinoa y camote", "\uD83C\uDF57",
+            MealSlot.LUNCH,
+            840, 66, 84, 22, 35, "food_chicken_bowl",
+            listOf(
+                ing("pollo", "250 g"),
+                ing("quinoa", "120 g en crudo"),
+                ing("camote", "200 g"),
+                ing("brocoli", "150 g"),
+                ing("almendras", "20 g"),
+            ),
+            listOf(
+                "Hornea el camote en cubos 25 minutos a 200 °C con paprika.",
+                "Cuece la quinoa en caldo, 15 minutos, y déjala reposar tapada.",
+                "Asa el pollo marinado con limón y orégano, 6 minutos por lado.",
+                "Arma el bowl por secciones y termina con almendras tostadas.",
+            ),
+        ),
+        recipe(
+            "s_batido_volumen", "Batido de volumen con avena y cacahuate", "\uD83E\uDD64",
+            MealSlot.SNACK,
+            420, 34, 46, 14, 5, "food_smoothie",
+            listOf(
+                ing("proteina_polvo", "1 scoop"),
+                ing("avena", "40 g"),
+                ing("platano", "1 pieza"),
+                ing("cacahuate", "15 g"),
+                ing("leche", "300 ml"),
+            ),
+            listOf(
+                "Licua todo con hielo hasta que quede espeso.",
+                "Si queda muy denso, agrega leche de 50 ml en 50 ml.",
+                "Tómalo dentro de la hora posterior al entrenamiento.",
+            ),
+        ),
+        recipe(
+            "d_salmon_papa_grande", "Salmón al horno con papa cambray y ejotes", "\uD83C\uDF63",
+            MealSlot.DINNER,
+            720, 50, 58, 30, 35, "food_salmon",
+            listOf(
+                ing("salmon", "220 g"),
+                ing("papa", "250 g"),
+                ing("ejotes", "150 g"),
+                ing("aceite_oliva", "1 cda"),
+                ing("limon", "1 pieza"),
+            ),
+            listOf(
+                "Corta las papas en mitades, mézclalas con aceite y hornéalas 20 minutos.",
+                "Agrega el salmón a la misma charola y hornea 12 minutos más.",
+                "Blanquea los ejotes 4 minutos y saltéalos con ajo.",
+                "Sirve con limón y eneldo o perejil picado.",
+            ),
+        ),
+        recipe(
+            "d_tacos_res_grande", "Tacos de res con frijoles y guacamole", "\uD83C\uDF2E",
+            MealSlot.DINNER,
+            680, 48, 62, 26, 25, "food_fish_tacos",
+            listOf(
+                ing("res", "200 g"),
+                ing("tortilla", "4 piezas"),
+                ing("frijoles", "150 g"),
+                ing("aguacate", "1/2 pieza"),
+                ing("jitomate", "1 pieza"),
+            ),
+            listOf(
+                "Cocina la res en tiras con cebolla a fuego alto para que dore sin soltar agua.",
+                "Machaca el aguacate con jitomate, limón y sal para el guacamole.",
+                "Calienta las tortillas directo en el comal hasta que inflen.",
+                "Arma los tacos con frijoles abajo, la carne encima y guacamole al final.",
+            ),
+        ),
+    )
+
+    val all: List<Recipe> = breakfasts + lunches + snacks + dinners + hearty
 
     val bySlot: Map<MealSlot, List<Recipe>> = all.groupBy { it.slot }
 

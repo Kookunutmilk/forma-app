@@ -17,6 +17,9 @@ object MealPlanGenerator {
 
     const val OPTIONS_PER_MEAL = 5
 
+    /** Recetas que compiten por entrar a las 5 opciones antes de ordenarlas por calorías. */
+    private const val CANDIDATE_POOL = 10
+
     fun optionsFor(profile: UserProfile, day: WeekDay): Map<MealSlot, List<Recipe>> {
         val liked = profile.likedIngredients
         val targetKcal = profile.dailyCalories
@@ -36,16 +39,24 @@ object MealPlanGenerator {
                 val kcalPenalty = abs(recipe.kcal - slotTarget) / slotTarget
                 // Pequeño ruido determinista por día para rotar el orden sin perder coherencia.
                 val jitter = random.nextDouble() * 0.12
-                recipe to (coverage * 1.6 - kcalPenalty * 0.9 + jitter)
+                recipe to (coverage * 1.5 - kcalPenalty * 1.3 + jitter)
             }.sortedByDescending { it.second }
 
             // Rotamos la lista según el día para que el lunes y el jueves no propongan lo mismo.
-            val ordered = scored.map { it.first }
-            val rotation = day.index % maxOf(1, ordered.size)
-            val rotated = ordered.drop(rotation) + ordered.take(rotation)
+            val candidates = scored.map { it.first }.take(CANDIDATE_POOL)
+            val rotation = day.index % maxOf(1, candidates.size)
+            val rotated = candidates.drop(rotation) + candidates.take(rotation)
 
             val head = rotated.take(OPTIONS_PER_MEAL)
-            if (head.size >= OPTIONS_PER_MEAL) head else (head + pool).distinct().take(OPTIONS_PER_MEAL)
+            val options = if (head.size >= OPTIONS_PER_MEAL) {
+                head
+            } else {
+                (head + pool).distinct().take(OPTIONS_PER_MEAL)
+            }
+
+            // La opción por defecto es la más cercana a las calorías del momento del día, para que
+            // el total sugerido no se quede corto frente a la meta diaria.
+            options.sortedBy { abs(it.kcal - slotTarget) }
         }
     }
 }

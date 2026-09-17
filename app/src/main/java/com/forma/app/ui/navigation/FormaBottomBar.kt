@@ -42,11 +42,14 @@ fun FormaBottomBar(
             .fillMaxWidth()
             .background(
                 Brush.verticalGradient(
-                    listOf(Color.Transparent, FormaBackground.copy(alpha = 0.96f), FormaBackground),
+                    0f to Color.Transparent,
+                    0.28f to FormaBackground.copy(alpha = 0.94f),
+                    0.5f to FormaBackground,
+                    1f to FormaBackground,
                 ),
             )
             .navigationBarsPadding()
-            .padding(horizontal = 4.dp, vertical = 8.dp),
+            .padding(start = 4.dp, end = 4.dp, top = 22.dp, bottom = 8.dp),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
     ) {

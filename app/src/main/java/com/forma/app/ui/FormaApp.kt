@@ -187,4 +187,4 @@ private fun NavHostController.navigateToTab(route: String) {
 }
 
 /** Alto reservado para que el contenido no quede debajo de la barra inferior. */
-val BottomBarSpacing = 96.dp
+val BottomBarSpacing = 112.dp
