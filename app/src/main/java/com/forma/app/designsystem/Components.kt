@@ -29,6 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.CloudOff
 import androidx.compose.material.icons.rounded.Inbox
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -567,6 +568,54 @@ fun ListRowChevron(modifier: Modifier = Modifier) {
         contentDescription = null,
         tint = FormaMutedSoft,
         modifier = modifier,
+    )
+}
+
+@Composable
+fun ConfirmationDialog(
+    title: String,
+    message: String,
+    confirmLabel: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+    dismissLabel: String = "Cancelar",
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = FormaSurface,
+        shape = RoundedCornerShape(24.dp),
+        title = {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.headlineSmall,
+                color = FormaOnBackground,
+            )
+        },
+        text = {
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodyMedium,
+                color = FormaMuted,
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(
+                    text = confirmLabel,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = FormaLime,
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(
+                    text = dismissLabel,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = FormaMuted,
+                )
+            }
+        },
     )
 }
 

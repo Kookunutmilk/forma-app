@@ -133,7 +133,10 @@ private fun MainNavigation(navController: NavHostController = rememberNavControl
                 route = Routes.ARTICLE,
                 arguments = listOf(navArgument("articleId") { type = NavType.StringType }),
             ) {
-                ArticleScreen(onBack = { navController.popBackStack() })
+                ArticleScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenArticle = { id -> navController.navigate(Routes.article(id)) },
+                )
             }
 
             composable(
