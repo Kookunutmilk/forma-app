@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Fondo de la ventana antes de que Compose dibuje, para evitar el flash blanco al abrir. -->
     <color name="forma_background">#0B0D0C</color>
-    <color name="forma_lime">#CBF43F</color>
 </resources>

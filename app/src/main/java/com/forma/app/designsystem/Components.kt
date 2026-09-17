@@ -424,8 +424,8 @@ fun FormaProgressBar(
 
 @Composable
 fun LoadingState(
-    message: String = "Preparando tu plan…",
     modifier: Modifier = Modifier,
+    message: String = "Preparando tu plan…",
 ) {
     Column(
         modifier = modifier
