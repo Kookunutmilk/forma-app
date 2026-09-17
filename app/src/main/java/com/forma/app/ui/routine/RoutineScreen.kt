@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -42,7 +44,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.forma.app.data.repository.exerciseKey
-import com.forma.app.designsystem.EmptyState
 import com.forma.app.designsystem.ErrorState
 import com.forma.app.designsystem.FormaBackground
 import com.forma.app.designsystem.FormaCard
@@ -106,6 +107,89 @@ fun RoutineScreen(
                 }
             }
         }
+    }
+}
+
+/**
+ * El día de descanso también es parte del plan: en vez de dejar la pantalla vacía se explica qué
+ * hacer y se ofrece un atajo a la siguiente sesión.
+ */
+@Composable
+private fun RestDayCard(
+    title: String,
+    focus: String,
+    nextSession: RoutineSession?,
+    onGoToNext: (WeekDay) -> Unit,
+) {
+    val tips = listOf(
+        "\uD83D\uDEB6" to "Camina 20 o 30 minutos a ritmo cómodo: mueve sangre sin sumar fatiga.",
+        "\uD83E\uDDD8" to "Estira 10 minutos lo que trabajaste esta semana, sin rebotes.",
+        "\uD83D\uDE34" to "Duerme 7 u 8 horas: el músculo crece descansando, no entrenando.",
+        "\uD83D\uDCA7" to "Bebe agua y no bajes la proteína aunque hoy no entrenes.",
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 20.dp),
+    ) {
+        FormaCard(
+            modifier = Modifier.fillMaxWidth(),
+            color = FormaLimeSoft,
+            contentPadding = PaddingValues(20.dp),
+        ) {
+            Text(text = "\uD83C\uDF1F", style = MaterialTheme.typography.displaySmall)
+            Spacer(Modifier.height(10.dp))
+            Text(
+                text = title,
+                style = MaterialTheme.typography.headlineMedium,
+                color = FormaLime,
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = focus,
+                style = MaterialTheme.typography.bodyLarge,
+                color = FormaOnBackground.copy(alpha = 0.85f),
+            )
+        }
+
+        Spacer(Modifier.height(20.dp))
+
+        Text(
+            text = "CÓMO APROVECHARLO",
+            style = MaterialTheme.typography.labelSmall,
+            color = FormaMuted,
+        )
+        Spacer(Modifier.height(10.dp))
+
+        tips.forEach { (emoji, tip) ->
+            FormaCard(
+                modifier = Modifier.padding(bottom = 10.dp),
+                contentPadding = PaddingValues(14.dp),
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = emoji, style = MaterialTheme.typography.titleLarge)
+                    Spacer(Modifier.width(14.dp))
+                    Text(
+                        text = tip,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = FormaMuted,
+                    )
+                }
+            }
+        }
+
+        if (nextSession != null) {
+            Spacer(Modifier.height(10.dp))
+            PrimaryButton(
+                text = "Ir a ${nextSession.day.full}: ${nextSession.title}",
+                onClick = { onGoToNext(nextSession.day) },
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+
+        Spacer(Modifier.height(BottomBarSpacing))
     }
 }
 
@@ -192,13 +276,14 @@ private fun RoutineContent(
 
         val session = state.session
         if (session == null || session.isRest) {
-            EmptyState(
+            val nextTraining = state.routine.sessions
+                .filterNot { it.isRest || it.exercises.isEmpty() }
+                .minByOrNull { (it.day.index - state.selectedDay.index + 7) % 7 }
+            RestDayCard(
                 title = session?.title ?: "Día libre",
-                message = session?.focus
-                    ?: "Este día no tiene sesión programada. Camina, estira y duerme bien.",
-                actionLabel = "Ver el lunes",
-                onAction = { viewModel.selectDay(WeekDay.MONDAY) },
-                modifier = Modifier.padding(top = 32.dp),
+                focus = session?.focus ?: "Este día no tiene sesión programada.",
+                nextSession = nextTraining,
+                onGoToNext = { day -> viewModel.selectDay(day) },
             )
             return@Column
         }
