@@ -8,6 +8,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -51,20 +52,28 @@ fun FormaApp(viewModel: RootViewModel = hiltViewModel()) {
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
+        contentAlignment = Alignment.TopCenter,
     ) {
-        when (state) {
-            RootState.Loading -> LoadingState(
-                message = "Cargando FORMA…",
-                modifier = Modifier.align(Alignment.Center),
-            )
+        // En tablets o pantallas muy anchas la app se queda en una columna legible y centrada.
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .widthIn(max = MaxContentWidth),
+        ) {
+            when (state) {
+                RootState.Loading -> LoadingState(
+                    message = "Cargando FORMA…",
+                    modifier = Modifier.align(Alignment.Center),
+                )
 
-            RootState.NeedsAuth -> AuthScreen()
+                RootState.NeedsAuth -> AuthScreen()
 
-            is RootState.NeedsOnboarding -> OnboardingScreen(
-                user = (state as RootState.NeedsOnboarding).user,
-            )
+                is RootState.NeedsOnboarding -> OnboardingScreen(
+                    user = (state as RootState.NeedsOnboarding).user,
+                )
 
-            is RootState.Ready -> MainNavigation()
+                is RootState.Ready -> MainNavigation()
+            }
         }
     }
 }
@@ -188,3 +197,6 @@ private fun NavHostController.navigateToTab(route: String) {
 
 /** Alto reservado para que el contenido no quede debajo de la barra inferior. */
 val BottomBarSpacing = 112.dp
+
+/** Ancho máximo de la columna de contenido; evita líneas larguísimas en pantallas anchas. */
+val MaxContentWidth = 600.dp
