@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Favorite
@@ -33,6 +34,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -74,6 +76,14 @@ fun CommunityScreen(
     val sports by viewModel.sportsWithPosts.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val sheetState = rememberModalBottomSheetState()
+    val listState = rememberLazyListState()
+
+    // Al publicar desde "Finalizar rutina" la lista conserva su posición y la publicación nueva
+    // queda arriba del área visible, así que la traemos al frente.
+    val newestPostId = state.posts.firstOrNull()?.id
+    LaunchedEffect(newestPostId) {
+        if (state.posts.firstOrNull()?.author?.isMe == true) listState.animateScrollToItem(0)
+    }
 
     Column(
         Modifier
@@ -144,6 +154,7 @@ fun CommunityScreen(
             )
 
             else -> LazyColumn(
+                state = listState,
                 contentPadding = PaddingValues(
                     start = 20.dp,
                     end = 20.dp,
