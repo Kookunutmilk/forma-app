@@ -3,6 +3,8 @@ package com.forma.app.data.repository
 import com.forma.app.data.local.dao.TrainingDao
 import com.forma.app.data.local.entity.ExerciseLogEntity
 import com.forma.app.data.local.entity.WorkoutSessionEntity
+import com.forma.app.data.remote.CloudSyncManager
+import com.forma.app.data.remote.FormaCloudStore
 import com.forma.app.domain.model.TrainingStats
 import com.forma.app.domain.model.UserProfile
 import com.forma.app.domain.model.WeekDay
@@ -25,6 +27,8 @@ fun exerciseKey(day: WeekDay, exerciseId: String) = "${day.index}|$exerciseId"
 class TrainingRepositoryImpl @Inject constructor(
     private val dao: TrainingDao,
     private val ai: AiRepository,
+    private val cloud: FormaCloudStore,
+    private val sync: CloudSyncManager,
 ) : TrainingRepository {
 
     override suspend fun weeklyRoutine(profile: UserProfile): WeeklyRoutine =
@@ -39,17 +43,22 @@ class TrainingRepositoryImpl @Inject constructor(
         exerciseId: String,
         completed: Boolean,
     ) {
-        dao.upsertLog(
-            ExerciseLogEntity(
-                dayIndex = day.index,
-                exerciseId = exerciseId,
-                completed = completed,
-                updatedAt = System.currentTimeMillis(),
-            ),
+        val log = ExerciseLogEntity(
+            dayIndex = day.index,
+            exerciseId = exerciseId,
+            completed = completed,
+            updatedAt = System.currentTimeMillis(),
         )
+        dao.upsertLog(log)
+        val uid = sync.currentUid() ?: return
+        if (cloud.isEnabled) runCatching { cloud.upsertExerciseLog(uid, log) }
     }
 
-    override suspend fun resetDay(day: WeekDay) = dao.clearDay(day.index)
+    override suspend fun resetDay(day: WeekDay) {
+        dao.clearDay(day.index)
+        val uid = sync.currentUid() ?: return
+        if (cloud.isEnabled) runCatching { cloud.clearExerciseDay(uid, day.index) }
+    }
 
     override fun sessions(): Flow<List<WorkoutSession>> =
         dao.observeSessions().map { list -> list.map { it.toDomain() } }
@@ -64,25 +73,26 @@ class TrainingRepositoryImpl @Inject constructor(
                 kcalThisWeek = thisWeek.sumOf { it.kcal },
                 completedDays = thisWeek.map { dayOf(it.dateEpochMillis) }.toSet(),
             ).let { stats ->
-                // Un día también cuenta como avanzado si ya marcaste ejercicios aunque no lo cierres.
                 val partialDays = logs.map { WeekDay.fromIndex(it.dayIndex) }.toSet()
                 stats.copy(completedDays = stats.completedDays + partialDays)
             }
         }
 
     override suspend fun finishWorkout(session: WorkoutSession) {
-        dao.insertSession(
-            WorkoutSessionEntity(
-                id = session.id,
-                dateEpochMillis = session.dateEpochMillis,
-                sportId = session.sportId,
-                title = session.title,
-                durationMinutes = session.durationMinutes,
-                kcal = session.kcal,
-                photoUri = session.photoUri,
-                note = session.note,
-            ),
+        val photo = sync.pushLocalFile(session.photoUri, "workouts")
+        val entity = WorkoutSessionEntity(
+            id = session.id,
+            dateEpochMillis = session.dateEpochMillis,
+            sportId = session.sportId,
+            title = session.title,
+            durationMinutes = session.durationMinutes,
+            kcal = session.kcal,
+            photoUri = photo,
+            note = session.note,
         )
+        dao.insertSession(entity)
+        val uid = sync.currentUid() ?: return
+        if (cloud.isEnabled) runCatching { cloud.upsertWorkoutSession(uid, entity) }
     }
 
     private fun WorkoutSessionEntity.toDomain() = WorkoutSession(
@@ -98,7 +108,6 @@ class TrainingRepositoryImpl @Inject constructor(
 
     private fun dayOf(millis: Long): WeekDay {
         val calendar = Calendar.getInstance().apply { timeInMillis = millis }
-        // Calendar.MONDAY == 2, así que restamos 2 para alinear con nuestro índice 0 = lunes.
         return WeekDay.fromIndex(calendar.get(Calendar.DAY_OF_WEEK) - 2)
     }
 

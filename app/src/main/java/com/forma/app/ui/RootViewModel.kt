@@ -2,6 +2,7 @@ package com.forma.app.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.forma.app.data.remote.CloudSyncManager
 import com.forma.app.domain.model.UserProfile
 import com.forma.app.domain.repository.AuthRepository
 import com.forma.app.domain.repository.AuthUser
@@ -28,6 +29,7 @@ class RootViewModel @Inject constructor(
     authRepository: AuthRepository,
     profileRepository: ProfileRepository,
     community: CommunityRepository,
+    private val cloudSync: CloudSyncManager,
 ) : ViewModel() {
 
     val state: StateFlow<RootState> =
@@ -40,10 +42,15 @@ class RootViewModel @Inject constructor(
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), RootState.Loading)
 
     init {
-        // El perfil público de la comunidad se mantiene sincronizado con el perfil local.
         viewModelScope.launch {
             profileRepository.profile.filterNotNull().collect { profile ->
                 community.syncMeWithProfile(profile)
+            }
+        }
+        // Con Firebase, baja perfil/rutina/dieta/chat/comunidad a Room al tener sesión.
+        viewModelScope.launch {
+            authRepository.currentUser.collect { user ->
+                if (user != null) cloudSync.pullIfNeeded(force = false)
             }
         }
     }

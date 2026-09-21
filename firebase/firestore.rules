@@ -1,0 +1,55 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    // Perfil y datos privados del usuario.
+    match /users/{uid} {
+      allow read, write: if isOwner(uid);
+
+      match /exercise_logs/{docId} {
+        allow read, write: if isOwner(uid);
+      }
+      match /workout_sessions/{docId} {
+        allow read, write: if isOwner(uid);
+      }
+      match /meal_choices/{docId} {
+        allow read, write: if isOwner(uid);
+      }
+      match /chat_messages/{docId} {
+        allow read, write: if isOwner(uid);
+      }
+      match /article_states/{docId} {
+        allow read, write: if isOwner(uid);
+      }
+      match /following/{authorId} {
+        allow read, write: if isOwner(uid);
+      }
+      match /engagement/{postId} {
+        allow read, write: if isOwner(uid);
+      }
+    }
+
+    // Feed público de la comunidad.
+    match /posts/{postId} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.authorId == request.auth.uid;
+      allow update: if signedIn();
+      allow delete: if signedIn()
+        && resource.data.authorId == request.auth.uid;
+    }
+
+    // Perfiles públicos de autores.
+    match /authors/{authorId} {
+      allow read: if true;
+      allow write: if signedIn() && authorId == request.auth.uid;
+    }
+  }
+}

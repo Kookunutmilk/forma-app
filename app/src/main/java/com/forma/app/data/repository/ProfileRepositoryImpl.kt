@@ -2,6 +2,8 @@ package com.forma.app.data.repository
 
 import com.forma.app.data.local.dao.ProfileDao
 import com.forma.app.data.local.entity.UserProfileEntity
+import com.forma.app.data.remote.CloudSyncManager
+import com.forma.app.data.remote.FormaCloudStore
 import com.forma.app.domain.model.ExperienceLevel
 import com.forma.app.domain.model.Goal
 import com.forma.app.domain.model.Sport
@@ -15,15 +17,31 @@ import javax.inject.Singleton
 @Singleton
 class ProfileRepositoryImpl @Inject constructor(
     private val dao: ProfileDao,
+    private val cloud: FormaCloudStore,
+    private val sync: CloudSyncManager,
 ) : ProfileRepository {
 
     override val profile: Flow<UserProfile?> = dao.observe().map { it?.toDomain() }
 
     override suspend fun current(): UserProfile? = dao.current()?.toDomain()
 
-    override suspend fun save(profile: UserProfile) = dao.upsert(profile.toEntity())
+    override suspend fun save(profile: UserProfile) {
+        val photo = sync.pushLocalProfilePhotoIfNeeded(profile.photoUri)
+        val toSave = if (photo != profile.photoUri) profile.copy(photoUri = photo) else profile
+        dao.upsert(toSave.toEntity())
+        val uid = sync.currentUid() ?: return
+        if (cloud.isEnabled) runCatching { cloud.upsertProfile(uid, toSave) }
+    }
 
-    override suspend fun updatePhoto(uri: String?) = dao.updatePhoto(uri)
+    override suspend fun updatePhoto(uri: String?) {
+        val uploaded = sync.pushLocalProfilePhotoIfNeeded(uri)
+        dao.updatePhoto(uploaded)
+        val uid = sync.currentUid() ?: return
+        val current = dao.current()?.toDomain() ?: return
+        if (cloud.isEnabled) {
+            runCatching { cloud.upsertProfile(uid, current.copy(photoUri = uploaded)) }
+        }
+    }
 
     override suspend fun clear() = dao.clear()
 }

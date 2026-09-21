@@ -3,6 +3,8 @@ package com.forma.app.data.repository
 import com.forma.app.data.catalog.ArticleCatalog
 import com.forma.app.data.local.dao.LearnDao
 import com.forma.app.data.local.entity.ArticleStateEntity
+import com.forma.app.data.remote.CloudSyncManager
+import com.forma.app.data.remote.FormaCloudStore
 import com.forma.app.domain.model.Article
 import com.forma.app.domain.model.ArticleCategory
 import com.forma.app.domain.repository.LearnRepository
@@ -14,6 +16,8 @@ import javax.inject.Singleton
 @Singleton
 class LearnRepositoryImpl @Inject constructor(
     private val dao: LearnDao,
+    private val cloud: FormaCloudStore,
+    private val sync: CloudSyncManager,
 ) : LearnRepository {
 
     private val withState: Flow<List<Article>> = dao.observeStates().map { states ->
@@ -34,6 +38,9 @@ class LearnRepositoryImpl @Inject constructor(
 
     override suspend fun toggleSaved(id: String) {
         val current = dao.state(id)?.saved ?: false
-        dao.upsert(ArticleStateEntity(articleId = id, saved = !current))
+        val state = ArticleStateEntity(articleId = id, saved = !current)
+        dao.upsert(state)
+        val uid = sync.currentUid() ?: return
+        if (cloud.isEnabled) runCatching { cloud.upsertArticleState(uid, state) }
     }
 }

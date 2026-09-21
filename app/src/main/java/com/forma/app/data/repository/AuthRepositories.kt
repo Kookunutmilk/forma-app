@@ -6,6 +6,7 @@ import com.forma.app.domain.repository.AuthUser
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.tasks.await
 import java.util.Locale
 import javax.inject.Inject
@@ -141,6 +142,14 @@ class FirebaseAuthRepository @Inject constructor(
     override suspend fun signOut() {
         auth.signOut()
         preferences.clearUser()
+    }
+
+    /** Si Firebase ya tiene sesión y DataStore no, la recupera. */
+    suspend fun restoreSessionIfNeeded() {
+        val firebaseUser = auth.currentUser ?: return
+        if (preferences.user.first() == null) {
+            preferences.saveUser(firebaseUser.toAuthUser())
+        }
     }
 
     private fun com.google.firebase.auth.FirebaseUser.toAuthUser() = AuthUser(

@@ -37,9 +37,10 @@ com.forma.app
 │   └── repository/  interfaces: Auth, Profile, Training, Nutrition, Community, Learn, Chat, Ai
 ├── data/
 │   ├── local/       Room (entidades, DAOs, base) y DataStore
+│   ├── remote/      FormaCloudStore (NoOp o Firebase Firestore/Storage)
 │   ├── catalog/     catálogos en español: ejercicios, plantillas por deporte, recetas, artículos
 │   ├── ai/          LocalAiRepository (determinista) y RemoteAiRepository (proveedor real)
-│   └── repository/  implementaciones de los repositorios
+│   └── repository/  implementaciones de los repositorios (Room-first + sync a la nube)
 ├── di/              módulos de Hilt
 └── ui/              navigation/ auth/ onboarding/ home/ routine/ diet/ community/ ai/ learn/ profile/
 ```
@@ -64,13 +65,18 @@ FORMA_AI_MODEL=gpt-4o-mini
 `RemoteAiRepository` cae de vuelta al motor local si falta la llave o la llamada falla, así que la
 app nunca se queda sin respuesta.
 
-### Autenticación sin Firebase
+### Autenticación y nube (Firebase)
 
-`AuthRepository` tiene dos implementaciones: `LocalAuthRepository` (persistida en DataStore, la que
-corre por omisión) y `FirebaseAuthRepository`. El módulo de Hilt elige una u otra según
-`BuildConfig.HAS_FIREBASE`, que a su vez depende de si existe `app/google-services.json`. Coloca ese
-archivo en `app/` y el plugin de Google Services y Firebase Auth se activan solos; sin él la app
-compila y corre igual.
+Sin `app/google-services.json` la app usa auth local (DataStore) y **solo Room**.
+
+Con `google-services.json` en `app/`:
+
+1. Se activa Firebase Auth.
+2. Room sigue siendo la caché offline.
+3. Perfil, rutinas, nutrición, chat, artículos guardados, comunidad y fotos se sincronizan con
+   **Cloud Firestore** y **Storage**.
+
+Pasos completos (proyecto, reglas, esquema): ver [`firebase/README.md`](firebase/README.md).
 
 ## Cómo abrirlo en Android Studio
 
@@ -93,7 +99,7 @@ Si el SDK no está en la ruta por defecto, crea `local.properties` con `sdk.dir=
 
 ## Datos y privacidad
 
-Todo vive en el dispositivo: Room guarda perfil, progreso, sesiones, elecciones de comida,
-publicaciones, chat y artículos guardados; DataStore guarda la sesión y las preferencias. Las fotos
-que eliges se copian al almacenamiento interno de la app (`ImageStore`) para que sigan visibles
-después de que caduque el permiso temporal del selector del sistema. No hay backend ni telemetría.
+- **Sin Firebase:** todo vive en el dispositivo (Room + DataStore + fotos en almacenamiento interno).
+- **Con Firebase:** Room es caché offline; los datos de cada usuario van a `users/{uid}/…` y el feed
+  público a `posts/`. Las fotos se suben a Storage. Las reglas en `firebase/` limitan lectura/escritura
+  al dueño (excepto el feed público).
