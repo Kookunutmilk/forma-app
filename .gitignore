@@ -2,6 +2,7 @@
 .gradle/
 .kotlin/
 local.properties
+.android-sdk/
 .idea/
 .DS_Store
 build/
@@ -11,3 +12,5 @@ captures/
 app/google-services.json
 *.hprof
 .android-sdk/
+.firebase-tools/
+.firebase/
