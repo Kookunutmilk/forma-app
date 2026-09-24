@@ -78,6 +78,10 @@ Con `google-services.json` en `app/`:
 
 Pasos completos (proyecto, reglas, esquema): ver [`firebase/README.md`](firebase/README.md).
 
+## Presentación, guión y reporte
+
+En [`docs/presentacion/`](docs/presentacion/index.html) hay una presentación navegable del proyecto (flechas, notas con `N`, índice con `O`), el [guión](docs/presentacion/guion.html) para quien la expone y el [reporte técnico](docs/presentacion/reporte.html) con las funciones, el motor y el modelo de datos. Ábrelos en el navegador; la presentación incluye un laboratorio en vivo de la rutina, las calorías y el coach.
+
 ## Cómo abrirlo en Android Studio
 
 1. Necesitas Android Studio Ladybug (2024.2) o posterior y JDK 17.

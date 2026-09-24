@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FORMA — Guión de la presentación</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@380;560;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="lectura.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="brand">FORMA · GUIÓN</div>
+    <nav>
+      <a href="index.html">Presentación</a>
+      <a href="reporte.html">Reporte</a>
+    </nav>
+  </header>
+  <main>
+    <div class="kicker">Guión para quien presenta</div>
+    <h1>Catorce minutos para contar FORMA.</h1>
+    <p class="lead">Este guión sigue las 16 diapositivas. Cada bloque dice qué hacer, qué decir y qué función nombrar. Las notas también viven dentro de la presentación: tecla N.</p>
+
+    <div class="card">
+      <strong>Antes de entrar</strong>
+      <p>Abre <code>docs/presentacion/index.html</code> en pantalla completa. Deja el nivel en Intermedio y el objetivo en Ganar músculo: así el laboratorio coincide con el perfil de prueba de Frida González, 65 kg, 170 cm, 21 años. No leas las diapositivas. Úsalas como mapa.</p>
+      <p>Duración cómoda: 14 minutos. Si recortas, quédate con las diapositivas 1, 2, 7, 8, 10, 13 y 16.</p>
+    </div>
+
+    <h2>01 · Portada · 40 s</h2>
+    <div class="beat">
+      <div class="when">Qué hacer</div>
+      <p>Entra en silencio un segundo. Deja que se lea «Tu semana, en forma».</p>
+      <div class="when">Qué decir</div>
+      <p>FORMA es una app Android nativa de entrenamiento y nutrición. Arma la rutina de la semana y el plan de comidas a partir de quien eres: deporte, nivel, objetivo, máquinas que tienes y comida que te gusta. Te acompaña en la sesión, te deja publicar el avance y responde dudas con un asistente. Toda la interfaz está en español. Y funciona completa sin llave de inteligencia artificial.</p>
+    </div>
+
+    <h2>02 · Tesis · 50 s</h2>
+    <div class="beat">
+      <div class="when">Qué decir</div>
+      <p>La idea que sostiene el proyecto es esta: el plan es una función del perfil. El mismo perfil produce siempre la misma semana. Si cambias el equipo o el objetivo, cambia el plan. Esa propiedad tiene nombre en el código.</p>
+      <p><code>RoutineGenerator.seedOf</code> mezcla el id de la persona, el equipo ordenado, el nivel y el objetivo. <code>generate</code> devuelve siete sesiones. <code>MealPlanGenerator.optionsFor</code> puntúa recetas. <code>LocalCoach.answer</code> reconoce la pregunta y contesta con el peso y las calorías reales. Por eso podemos probarlo sin red.</p>
+    </div>
+
+    <h2>03 · Producto · 55 s</h2>
+    <div class="beat">
+      <div class="when">Qué decir</div>
+      <p>No memorices el tablero. Quédate con tres cifras: ocho deportes, sesenta ejercicios de gym filtrados por tu equipo, cincuenta y siete recetas. Detrás hay sesenta y tres alimentos y ciento diecisiete piezas de equipo. La cuenta puede ser local, en DataStore, o Firebase si existe <code>google-services.json</code>. Room sigue siendo la memoria del teléfono en los dos casos.</p>
+    </div>
+
+    <h2>04 · Recorrido · 70 s</h2>
+    <div class="beat">
+      <div class="when">Qué señalar</div>
+      <p>La flecha Loading → NeedsAuth → NeedsOnboarding → Ready. Vive en <code>RootViewModel</code> y la pinta <code>FormaApp</code>.</p>
+      <div class="when">Qué decir</div>
+      <p>El onboarding son cinco pasos con reglas concretas. El nombre necesita dos letras. El equipo no puede quedar vacío. Los ingredientes que te gustan tienen que ser al menos tres. <code>OnboardingViewModel.next</code> guarda el <code>UserProfile</code> con <code>onboardingCompleted</code> en verdadero. Si cambias de gym a yoga, <code>onSport</code> tira el equipo anterior y carga <code>EquipmentCatalog.defaultSelection</code>, porque esas máquinas ya no existen en el nuevo deporte.</p>
+      <p>La autenticación es intercambiable. <code>AuthModule.provideAuthRepository</code> mira <code>BuildConfig.HAS_FIREBASE</code> y entrega <code>LocalAuthRepository</code> o <code>FirebaseAuthRepository</code>. Las dos implementan <code>signInWithEmail</code>, <code>signUpWithEmail</code>, <code>signInWithGoogle</code> y <code>signOut</code>. La pantalla no se entera del cambio.</p>
+    </div>
+
+    <h2>05 · Seis pestañas · 45 s</h2>
+    <div class="beat">
+      <div class="when">Qué decir</div>
+      <p>Inicio, Rutina, Dieta, Comunidad, IA y Aprender. Cada una tiene su ViewModel. Todas leen el mismo perfil. Las rutas están en el objeto <code>Routes</code> y <code>navigateToTab</code> guarda el estado al saltar de una a otra. Perfil, notificaciones, ingredientes, detalle de receta y cierre de entreno son pantallas que se abren encima y esconden la barra.</p>
+    </div>
+
+    <h2>06 · Inicio · 50 s</h2>
+    <div class="beat">
+      <div class="when">Qué decir</div>
+      <p>Inicio no inventa números. <code>todayWeekDay</code> convierte el calendario. <code>greeting</code> dice buenos días, tardes o noches según la hora. <code>HomeViewModel</code> combina perfil, <code>TrainingRepository.stats</code>, artículos recomendados y la sesión de hoy. El IMC sale de <code>UserProfile.bmi</code> y la etiqueta de <code>bmiLabel</code>. Las calorías del día salen de <code>dailyCalories</code>. Si la generación falla, <code>retry</code> vuelve a pedir la rutina.</p>
+    </div>
+
+    <h2>07 · Rutina · 75 s · momento en vivo</h2>
+    <div class="beat">
+      <div class="when">Qué hacer</div>
+      <p>Cambia el nivel de Principiante a Avanzado delante del público. Luego pon el objetivo en Bajar grasa y señala el sábado.</p>
+      <div class="when">Qué decir</div>
+      <p>En gym, <code>gymPlan</code> decide el split. Principiante entrena cuerpo completo. Intermedio reparte pecho, espalda, pierna, hombro y brazo. Avanzado mete seis ejercicios por día. <code>pickExercises</code> solo acepta lo que <code>GymExerciseCatalog.available</code> deja pasar según las máquinas marcadas. Si no queda ninguna, usa la variante sin equipo para que el día no salga vacío.</p>
+      <p><code>toExercise</code> escribe la prescripción. El primer ejercicio es el compuesto. Principiante hace tres series. Intermedio sube a cuatro en el compuesto. Avanzado llega a cinco. Si el objetivo es bajar grasa o ganar resistencia, las repeticiones van al rango alto y el descanso baja hasta 45 segundos. Si no, el compuesto descansa 120.</p>
+      <p>En la sesión, <code>toggleExercise</code> guarda el check y arranca <code>startTimer</code>. El timer vive en el ViewModel, con un segundo de verdad, no en un adorno de la UI. Al cerrar, <code>FinishWorkoutViewModel.save</code> crea la sesión. Si eliges compartir, <code>publish</code> la manda a la comunidad.</p>
+      <p>Los otros siete deportes no usan el catálogo de máquinas: los arma <code>SportSessionTemplates.sessions</code>.</p>
+    </div>
+
+    <h2>08 · Dieta · 70 s · momento en vivo</h2>
+    <div class="beat">
+      <div class="when">Qué hacer</div>
+      <p>Sube el peso. Deja que se muevan el IMC, las calorías y la proteína. El laboratorio usa la misma fórmula que <code>UserProfile</code>.</p>
+      <div class="when">Qué decir</div>
+      <p>La meta calórica es Mifflin–St Jeor: 10 por el peso, más 6.25 por la estatura, menos 5 por la edad, más 5. Eso se multiplica por la actividad del nivel: 1.375, 1.55 o 1.725. Luego se suma el turno del objetivo: menos 350 para bajar grasa, más 300 para músculo, 0 para mantener, más 150 para resistencia. Se redondea a decenas.</p>
+      <p>La proteína es 2 gramos por kilo si quieres músculo, 2.2 si quieres bajar grasa y 1.7 en los otros objetivos. El día se reparte en desayuno 26 %, almuerzo 36 %, snack 12 % y cena 26 %.</p>
+      <p><code>optionsFor</code> ofrece cinco recetas por comida. La puntuación premia los ingredientes que marcaste y castiga la distancia a las calorías de ese momento. Un jitter determinista rota el menú entre días. La opción que aparece seleccionada es la más cercana a la meta. En la app, <code>chooseOption</code> cambia la receta y <code>setPlatePhoto</code> guarda la foto del plato.</p>
+    </div>
+
+    <h2>09 · Comunidad · 40 s</h2>
+    <div class="beat">
+      <div class="when">Qué decir</div>
+      <p>El feed permite like, cinco reacciones —fuego, fuerza, aplauso, amor e imparable—, seguir y publicar. No hay comentarios: el producto enseña el logro. <code>CommunitySeed</code> deja ocho autores y ocho posts, uno por deporte, para que la primera apertura no esté vacía. <code>selectSport</code> filtra. <code>syncMeWithProfile</code> mantiene tu ficha de autor alineada con tu perfil.</p>
+    </div>
+
+    <h2>10 · IA · 70 s · momento en vivo</h2>
+    <div class="beat">
+      <div class="when">Qué hacer</div>
+      <p>Pulsa «¿Cuántas proteínas necesito?» o escribe la pregunta con acento. La respuesta tiene que citar los kilos de la diapositiva de Dieta. Prueba cardio y menciona que el orden cambia con el objetivo elegido en Rutina: el perfil de la demo es el mismo.</p>
+      <div class="when">Qué decir</div>
+      <p><code>AiRepository</code> es la única puerta: rutina, comidas y chat. Hoy <code>AiModule</code> inyecta <code>LocalAiRepository</code>. <code>LocalCoach.answer</code> normaliza acentos y elige la intención con más palabras clave. Hay dieciséis: proteína, sentadilla, preentreno, descanso, hombro, cardio, IMC, calorías, agua, creatina, sueño, agujetas, rutina, bajar grasa, ganar músculo y dolor. Si ninguna coincide, el fallback saluda por el nombre y recomienda un artículo real del catálogo.</p>
+      <p><code>RemoteAiRepository</code> está listo. <code>requestCompletion</code> hace POST a <code>/chat/completions</code>. Si falta <code>FORMA_AI_API_KEY</code> o la llamada falla, responde el coach local. La rutina y la dieta siguen generándose en el teléfono para que cada ejercicio y cada receta existan en el catálogo. <code>ChatRepositoryImpl.send</code> guarda el hilo en Room.</p>
+    </div>
+
+    <h2>11 · Aprender · 35 s</h2>
+    <div class="beat">
+      <div class="when">Qué decir</div>
+      <p>Diez artículos en cinco categorías: técnica, nutrición, lesiones, recuperación y mentalidad. <code>LearnViewModel</code> filtra con <code>selectCategory</code>, busca con <code>onQueryChange</code> y puede dejar solo guardados. El coach no inventa lecturas: cita títulos que están en <code>ArticleCatalog</code>.</p>
+    </div>
+
+    <h2>12 · Arquitectura · 50 s</h2>
+    <div class="beat">
+      <div class="when">Qué decir</div>
+      <p>Un módulo, cuatro capas y una dirección. La UI observa <code>StateFlow</code> con <code>collectAsStateWithLifecycle</code>. El dominio son modelos puros y ocho interfaces. Los datos implementan esas interfaces con Room primero. Hilt ata las piezas en <code>DatabaseModule</code>, <code>AiModule</code>, <code>AuthModule</code>, <code>RepositoryModule</code> y <code>CloudModule</code>. Cambiar de coach local a remoto es cambiar un binding, no reescribir pantallas. Son 76 archivos Kotlin y cerca de trece mil ochocientas líneas.</p>
+    </div>
+
+    <h2>13 · Funciones · 60 s</h2>
+    <div class="beat">
+      <div class="when">Qué hacer</div>
+      <p>Abre la pestaña Repositorios. Lee solo los verbos que la persona siente: entrar, guardar perfil, marcar ejercicio, elegir comida, publicar, preguntar. Cambia una vez a Motor para mostrar que el mapa es navegable. El resto está en el reporte.</p>
+    </div>
+
+    <h2>14 · Datos · 45 s</h2>
+    <div class="beat">
+      <div class="when">Qué decir</div>
+      <p>Ocho tablas Room: perfil, ejercicios marcados, sesiones, comidas elegidas, autores, posts, chat y artículos guardados. <code>FormaPreferences</code> guarda la sesión local, los segundos de descanso y los recordatorios. <code>FormaCloudStore</code> es el contrato remoto. Sin Firebase, <code>NoOpCloudStore</code> no hace nada. Con Firebase, <code>CloudSyncManager</code> baja los datos al entrar y sube cada guardado. Las reglas <code>isOwner</code> cierran <code>users/{uid}</code>. El feed de posts es público a propósito. Las fotos pasan por <code>ImageStore.persist</code> y, si hay nube, por <code>uploadUserFile</code>.</p>
+    </div>
+
+    <h2>15 · Calidad · 40 s</h2>
+    <div class="beat">
+      <div class="when">Qué decir</div>
+      <p>No recites el catálogo de versiones. Di la propiedad que importa: las pruebas de rutina, comida y coach fijan el determinismo. El mismo perfil devuelve el mismo plan. La rutina de gym solo usa equipo marcado. El coach usa el peso real y contesta igual con o sin acentos. <code>NoOpCloudStore</code> cumple el contrato apagado. El comando es <code>./gradlew test</code>.</p>
+    </div>
+
+    <h2>16 · Cierre · 30 s</h2>
+    <div class="beat">
+      <div class="when">Qué decir</div>
+      <p>FORMA ya se puede abrir en Android Studio, instalar con <code>installDebug</code> y explicar función por función. La nube se enciende con un json. El modelo remoto se enciende con una llave y un binding. Mientras tanto, el teléfono alcanza. Un perfil, una semana, un plato, una comunidad breve y un coach que contesta aunque no haya red.</p>
+      <p>Si preguntan por el detalle, abre el reporte. Ahí está cada interfaz, cada tabla y cada prueba.</p>
+    </div>
+
+    <h2>Si preguntan</h2>
+    <div class="card">
+      <h3>¿La IA inventa ejercicios?</h3>
+      <p>No en el motor local. Elige dentro de <code>GymExerciseCatalog</code> y de <code>RecipeCatalog</code>. El remoto, hoy, solo sustituye el chat. La rutina y la dieta siguen en el dispositivo para no devolver un ejercicio que la app no conoce.</p>
+      <h3>¿Hace falta Firebase para la demo?</h3>
+      <p>No. Sin <code>google-services.json</code> la auth es local y los datos viven en Room.</p>
+      <h3>¿Por qué no hay comentarios?</h3>
+      <p>Es una decisión de producto. El enum <code>Reaction</code> cubre el reconocimiento. El modelo <code>Post</code> no tiene hilo.</p>
+      <h3>¿Dónde está la fórmula?</h3>
+      <p>En las propiedades <code>dailyCalories</code>, <code>proteinTargetG</code>, <code>bmi</code> y <code>bmiLabel</code> de <code>UserProfile</code>. El laboratorio de la presentación replica esas cuentas.</p>
+    </div>
+
+    <footer>Guión alineado con el código de FORMA 1.0.0. Vuelve a la <a href="index.html">presentación</a> o abre el <a href="reporte.html">reporte</a>.</footer>
+  </main>
+</body>
+</html>
