@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FORMA — Presentación con capturas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@360;480;640;750&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="presentacion.css" />
+  <link rel="stylesheet" href="capturas.css" />
+</head>
+<body>
+  <div class="deck">
+    <header class="chrome top">
+      <div class="brand"><span class="mark"></span> FORMA · CAPTURAS</div>
+      <div class="counter" id="counter">01 / 21</div>
+      <div class="tools">
+        <a class="tool" href="pdf/FORMA-presentacion-con-capturas.pdf">PDF</a>
+        <a class="tool" href="guion.html">Guión</a>
+        <a class="tool" href="index.html">Sin capturas</a>
+        <button class="tool" id="btn-notes" type="button">Notas <kbd>N</kbd></button>
+        <button class="tool" id="btn-overview" type="button">Índice <kbd>O</kbd></button>
+      </div>
+    </header>
+
+    <main class="viewport" id="viewport">
+      <section class="slide shot active" data-title="Portada">
+        <div>
+          <div class="kicker">App Android nativa · v1.0.0 · com.forma.app</div>
+          <h1>Tu semana,<br />en <span style="color:var(--lime)">forma.</span></h1>
+          <p class="lead">Entrenamiento y nutrición que se arman con tu deporte, tu equipo y lo que te gusta comer. Un asistente que responde con tus datos. Una comunidad que celebra el avance.</p>
+          <div class="meta-row">
+            <span class="pill">Kotlin + Jetpack Compose</span>
+            <span class="pill">MVVM · StateFlow</span>
+            <span class="pill">Room primero</span>
+            <span class="pill">IA local determinista</span>
+          </div>
+          <p class="cap">La captura es la puerta real: correo, Google o cuenta local.</p>
+        </div>
+        <div class="phones"><img src="capturas/01-auth.png" alt="Pantalla de acceso de FORMA" /></div>
+        <aside class="notes"><h4>Guión · bloque 01 · 40 s</h4><p>Mismo texto de portada. Señala el teléfono: ahí se entra con correo o con Google. La línea de abajo dice que esta sesión la gestiona la cuenta local, porque no hay Firebase en la demo.</p></aside>
+      </section>
+
+      <section class="slide" data-title="La tesis">
+        <div class="kicker">02 · Tesis</div>
+        <h2>El mismo perfil produce siempre el mismo plan.</h2>
+        <p class="lead">La personalización no es un prompt al azar. Es una función pura del perfil: deporte, nivel, objetivo, equipo e ingredientes. Cambias un dato y cambia la semana. No cambias nada y el lunes sigue siendo el mismo lunes.</p>
+        <div class="grid-3 wide">
+          <article class="card"><div class="num">seed</div><h3>Rutina</h3><p><span class="fn">RoutineGenerator.seedOf</span> mezcla id, equipo, nivel y objetivo. <span class="fn">generate</span> devuelve siete sesiones.</p></article>
+          <article class="card aqua"><div class="num">score</div><h3>Comida</h3><p><span class="fn dim">MealPlanGenerator.optionsFor</span> puntúa recetas por ingredientes favoritos y cercanía calórica.</p></article>
+          <article class="card violet"><div class="num">intent</div><h3>Coach</h3><p><span class="fn">LocalCoach.answer</span> reconoce la pregunta y responde con peso, IMC y calorías del perfil.</p></article>
+        </div>
+        <aside class="notes"><h4>Guión · bloque 02 · 50 s</h4><p>Igual que la presentación sin capturas. Nombra RoutineGenerator, MealPlanGenerator y LocalCoach. La Frida de las fotos es el ejemplo vivo de esta tesis.</p></aside>
+      </section>
+
+      <section class="slide shot" data-title="Producto">
+        <div>
+          <div class="kicker">03 · Producto</div>
+          <h2>Una sola app para entrenar, comer, compartir y aprender.</h2>
+          <div class="grid-2" style="margin-top:12px">
+            <article class="card"><div class="num">8</div><h3>Deportes</h3><p>Del gym al boxeo.</p></article>
+            <article class="card"><div class="num">60</div><h3>Ejercicios</h3><p>Filtrados por tu equipo.</p></article>
+            <article class="card"><div class="num">57</div><h3>Recetas</h3><p>Con macros e ingredientes.</p></article>
+            <article class="card"><div class="num">63</div><h3>Alimentos</h3><p>Los que marcas como tuyos.</p></article>
+          </div>
+        </div>
+        <div class="phones"><img src="capturas/07-inicio.png" alt="Inicio con perfil, accesos y artículos" /></div>
+        <aside class="notes"><h4>Guión · bloque 03 · 55 s</h4><p>Quédate con tres cifras: ocho deportes, sesenta ejercicios, cincuenta y siete recetas. El teléfono ya enseña el inicio de Frida: IMC, accesos y artículos. La nube sigue siendo opcional.</p></aside>
+      </section>
+
+      <section class="slide shot pair" data-title="Perfil y cuerpo">
+        <div>
+          <div class="kicker">04 · Onboarding · pasos 1 y 2</div>
+          <h2>De la cuenta a la primera semana.</h2>
+          <p class="lead"><span class="fn">RootViewModel</span> pasa de NeedsAuth a NeedsOnboarding. <span class="fn">OnboardingViewModel.next</span> guarda el perfil al final.</p>
+          <div class="steps">
+            <div class="step"><b>1</b><div>Nombre y foto <small><span class="fn">onName</span> <span class="fn">onPhoto</span> · mínimo 2 letras</small></div></div>
+            <div class="step"><b>2</b><div>Edad, peso, estatura y objetivo <small><span class="fn">onAge</span> <span class="fn">onWeight</span> <span class="fn">onHeight</span> <span class="fn">onGoal</span></small></div></div>
+          </div>
+          <p class="cap">Frida González, 21 años, 60 kg, 158 cm, ganar músculo.</p>
+        </div>
+        <div class="phones">
+          <img src="capturas/02-perfil.png" alt="Paso 1, crea tu perfil" />
+          <img src="capturas/03-cuerpo.png" alt="Paso 2, tu cuerpo" />
+        </div>
+        <aside class="notes"><h4>Guión · bloque 04 · primera parte</h4><p>Dibuja el camino: entrar, presentarte, medir el cuerpo. El nombre de la captura es Frida González. El objetivo marcado es ganar músculo. Sigue con las dos láminas siguientes sin cambiar de bloque del guión.</p></aside>
+      </section>
+
+      <section class="slide shot pair" data-title="Deporte y equipo">
+        <div>
+          <div class="kicker">04 · Onboarding · pasos 3 y 4</div>
+          <h2>El deporte cambia el equipo.</h2>
+          <p class="lead"><span class="fn">onSport</span> tira las máquinas anteriores y carga <span class="fn">EquipmentCatalog.defaultSelection</span>. En gym hay que marcar al menos una pieza.</p>
+          <p class="cap">Intermedio, gym, 18 máquinas. <span class="fn">selectAllEquipment</span> y <span class="fn">clearEquipment</span> están en Todo y Ninguno.</p>
+        </div>
+        <div class="phones">
+          <img src="capturas/04-experiencia.png" alt="Paso 3, nivel y deporte" />
+          <img src="capturas/05-gym.png" alt="Paso 4, máquinas del gym" />
+        </div>
+        <aside class="notes"><h4>Guión · bloque 04 · sigue</h4><p>Si cambiaras de gym a yoga, este equipo desaparece porque esas máquinas no existen en el otro deporte. La auth local y la de Firebase comparten AuthRepository. Aquí la captura dice cuenta local.</p></aside>
+      </section>
+
+      <section class="slide shot" data-title="Alimentos">
+        <div>
+          <div class="kicker">04 · Onboarding · paso 5</div>
+          <h2>El menú sale de lo que te gusta.</h2>
+          <p class="lead"><span class="fn">toggleIngredient</span> pide al menos tres alimentos. <span class="fn">next</span> guarda el <span class="mono">UserProfile</span> con <span class="mono">onboardingCompleted</span>.</p>
+          <article class="card" style="margin-top:12px">
+            <h3>Lo que Frida dejó marcado</h3>
+            <p>Aguacate, aceite de oliva, almendras, crema de cacahuate, chía, plátano, fresas, arándanos, manzana, mango y limón. Ese conjunto es el que <span class="fn">optionsFor</span> va a premiar.</p>
+          </article>
+        </div>
+        <div class="phones"><img src="capturas/06-alimentos.png" alt="Paso 5, alimentos favoritos" /></div>
+        <aside class="notes"><h4>Guión · bloque 04 · cierra el onboarding</h4><p>Mínimo tres ingredientes. El botón ya dice Comenzar. A partir de aquí el perfil está cerrado y las pestañas leen los mismos datos.</p></aside>
+      </section>
+
+      <section class="slide" data-title="Seis pestañas">
+        <div class="kicker">05 · Mapa</div>
+        <h2>Seis superficies, un perfil.</h2>
+        <div class="grid-3 wide">
+          <article class="card"><h3>Inicio</h3><p>Saludo, racha, entreno de hoy, IMC y artículos. <span class="fn">HomeViewModel</span></p></article>
+          <article class="card aqua"><h3>Rutina</h3><p>Checks, cronómetro y cierre con foto. <span class="fn dim">RoutineViewModel</span></p></article>
+          <article class="card orange"><h3>Dieta</h3><p>Cuatro comidas y cinco opciones. <span class="fn warm">DietViewModel</span></p></article>
+          <article class="card magenta"><h3>Comunidad</h3><p>Like, reacciones, seguir y publicar. <span class="fn">CommunityViewModel</span></p></article>
+          <article class="card violet"><h3>IA</h3><p>Preguntas sugeridas y chat con tu perfil. <span class="fn">AiViewModel</span></p></article>
+          <article class="card"><h3>Aprender</h3><p>Artículos, buscador y guardados. <span class="fn">LearnViewModel</span></p></article>
+        </div>
+        <p class="muted wide"><span class="fn">navigateToTab</span> conserva el estado de cada pestaña. La barra se ve en todas las capturas de aquí en adelante.</p>
+        <aside class="notes"><h4>Guión · bloque 05 · 45 s</h4><p>No entres al detalle. Cada pestaña es un ViewModel y todas leen el mismo UserProfile. La barra inferior de las fotos es exactamente bottomTabs.</p></aside>
+      </section>
+
+      <section class="slide shot" data-title="Inicio">
+        <div>
+          <div class="kicker">06 · Inicio</div>
+          <h2>El día, en una pantalla.</h2>
+          <p class="lead"><span class="fn">todayWeekDay</span> y <span class="fn">greeting</span> arman el saludo. <span class="fn">HomeViewModel</span> junta perfil, <span class="fn">stats</span>, artículos y la sesión de hoy.</p>
+          <article class="card" style="margin-top:12px">
+            <h3>Lo que se lee en la captura</h3>
+            <p>60 kg · 158 cm. IMC 24.0, Normal. Gym, intermedio. Abajo, los artículos de hombro y de nutrición post-entreno, los mismos del catálogo.</p>
+          </article>
+          <p class="cap"><span class="fn">bmi</span> y <span class="fn">bmiLabel</span> viven en el modelo, no escritos a mano en la pantalla.</p>
+        </div>
+        <div class="phones"><img src="capturas/07-inicio.png" alt="Inicio de Frida" /></div>
+        <aside class="notes"><h4>Guión · bloque 06 · 50 s</h4><p>Inicio no inventa el dashboard. El IMC 24.0 sale de 60 kg y 158 cm. Los accesos abren Dieta, Comunidad, IA y Aprender. Si la rutina fallara, retry vuelve a pedirla.</p></aside>
+      </section>
+
+      <section class="slide shot pair" data-title="Rutina">
+        <div>
+          <div class="kicker">07 · Rutina</div>
+          <h2>La semana sale del equipo que marcaste.</h2>
+          <p class="lead">Jueves de hombro, nivel intermedio: cuatro ejercicios, 6-8 en el compuesto y descanso de 120 s. <span class="fn">toggleExercise</span> guarda el check y llama <span class="fn">startTimer</span>.</p>
+          <p class="cap">A la derecha, flexiones pike hechas y 1:50 de descanso. El timer corre en el ViewModel.</p>
+        </div>
+        <div class="phones">
+          <img src="capturas/08-rutina.png" alt="Sesión de hombro" />
+          <img src="capturas/09-descanso.png" alt="Ejercicio marcado y cronómetro" />
+        </div>
+        <aside class="notes"><h4>Guión · bloque 07 · 75 s</h4><p>No hay selector en esta versión: señala las dos capturas. Intermedio reparte pecho, espalda, pierna, hombro y brazo. El primer ejercicio lleva el rango bajo y 120 segundos. Al marcarlo, startTimer arranca. Los otros deportes los arma SportSessionTemplates.sessions. Al cerrar, FinishWorkoutViewModel.save puede publicar la foto.</p></aside>
+      </section>
+
+      <section class="slide shot pair" data-title="Dieta">
+        <div>
+          <div class="kicker">08 · Dieta</div>
+          <h2>La meta es del cuerpo. El plato, del gusto.</h2>
+          <p class="lead">Con 60 kg, 158 cm, 21 años, intermedio y ganar músculo, <span class="fn">dailyCalories</span> da 2610 kcal y <span class="fn">proteinTargetG</span> da 120 g. Es el número que la app escribe como objetivo.</p>
+          <p class="cap">Cambiar el desayuno a chilaquiles baja el día de 1970 a 1790 kcal. Eso es <span class="fn">chooseOption</span>.</p>
+        </div>
+        <div class="phones">
+          <img src="capturas/10-dieta.png" alt="Plan del jueves" />
+          <img src="capturas/13-dieta-cambio.png" alt="Desayuno cambiado a chilaquiles" />
+        </div>
+        <aside class="notes"><h4>Guión · bloque 08 · 70 s</h4><p>Explica la fórmula y luego señala el objetivo de 2610 kcal en la captura. La proteína del perfil son 120 g. El reparto sigue siendo 26, 36, 12 y 26. optionsFor ofrece cinco recetas; la segunda foto es la misma comida después de elegir otra opción. Aguacate y almendras aparecen porque los marcó.</p></aside>
+      </section>
+
+      <section class="slide shot pair" data-title="Receta">
+        <div>
+          <div class="kicker">08 · Dieta · detalle</div>
+          <h2>Ingredientes, pasos y la foto del plato.</h2>
+          <p class="lead">El burrito trae 660 kcal, 38 g de proteína y cuatro pasos. <span class="fn">setPlatePhoto</span> guarda la imagen solo para ti, en el historial de comidas.</p>
+        </div>
+        <div class="phones">
+          <img src="capturas/11-receta.png" alt="Detalle del burrito" />
+          <img src="capturas/12-plato.png" alt="Subir foto del plato" />
+        </div>
+        <aside class="notes"><h4>Guión · bloque 08 · sigue</h4><p>Abre la receta y baja hasta Tu plato. Esa foto no se publica en la comunidad: queda en la comida del día. RecipeDetailViewModel.onPlatePhoto es el gesto.</p></aside>
+      </section>
+
+      <section class="slide shot" data-title="Comunidad">
+        <div>
+          <div class="kicker">09 · Comunidad</div>
+          <h2>Un feed para el progreso.</h2>
+          <p class="lead">Like, cinco reacciones, seguir y publicar. El hilo de comentarios queda fuera del producto.</p>
+          <article class="card" style="margin-top:12px">
+            <h3>La captura es el seed</h3>
+            <p>María G. en yoga, hace 24 min, con fuego, fuerza y aplauso. Carlos aparece debajo. El filtro de arriba es <span class="fn">selectSport</span>. Seguir es <span class="fn">toggleFollow</span>.</p>
+          </article>
+        </div>
+        <div class="phones"><img src="capturas/14-comunidad.png" alt="Feed de la comunidad" /></div>
+        <aside class="notes"><h4>Guión · bloque 09 · 40 s</h4><p>Señala que no hay caja de comentarios. El feed no nace vacío: CommunitySeed deja ocho autores, uno por deporte. María es la primera.</p></aside>
+      </section>
+
+      <section class="slide shot" data-title="IA">
+        <div>
+          <div class="kicker">10 · Asistente</div>
+          <h2>Un coach que ya conoce tu nombre.</h2>
+          <p class="lead">La captura saluda a Frida y dice «FORMA local». Las seis preguntas son <span class="mono">LocalCoach.suggestedQuestions</span>, tal cual.</p>
+          <article class="card" style="margin-top:12px">
+            <h3>La misma puerta</h3>
+            <p><span class="fn">AiRepository</span> genera rutina, comidas y chat. <span class="fn dim">RemoteAiRepository.answer</span> cae al coach local si no hay llave o la red falla. <span class="fn">ChatRepositoryImpl.send</span> guarda el hilo en Room.</p>
+          </article>
+        </div>
+        <div class="phones"><img src="capturas/15-ia.png" alt="Asistente IA con preguntas frecuentes" /></div>
+        <aside class="notes"><h4>Guión · bloque 10 · 70 s</h4><p>Lee el saludo: usa el nombre del perfil. Las preguntas de la pantalla son las del código. Si preguntara por proteína, la respuesta citaría sus 60 kg. Dieciséis intenciones, acentos normalizados, y el remoto nunca deja la pantalla muda.</p></aside>
+      </section>
+
+      <section class="slide shot pair" data-title="Aprender">
+        <div>
+          <div class="kicker">11 · Aprender</div>
+          <h2>Diez lecturas, cinco cajones.</h2>
+          <p class="lead"><span class="fn">selectCategory</span> filtra. <span class="fn">onQueryChange</span> busca. La sentadilla está destacada; Técnica deja solo esa familia.</p>
+        </div>
+        <div class="phones">
+          <img src="capturas/16-aprender.png" alt="Catálogo de artículos" />
+          <img src="capturas/18-tecnica.png" alt="Artículos filtrados por técnica" />
+        </div>
+        <aside class="notes"><h4>Guión · bloque 11 · 35 s</h4><p>Técnica, nutrición, lesiones, recuperación y mentalidad. El coach cita estos títulos. Pasa a la lámina del artículo sin cambiar de bloque.</p></aside>
+      </section>
+
+      <section class="slide shot" data-title="Artículo">
+        <div>
+          <div class="kicker">11 · Aprender · lectura</div>
+          <h2>El mismo texto que resume el coach.</h2>
+          <p class="lead">Manguito rotador, calentamiento con banda, equilibrio push/pull y señales de alarma. <span class="fn">ArticleViewModel.toggleSaved</span> persiste el marcador de arriba a la derecha.</p>
+        </div>
+        <div class="phones"><img src="capturas/17-articulo.png" alt="Artículo de prevención de hombro" /></div>
+        <aside class="notes"><h4>Guión · bloque 11 · cierra</h4><p>Si alguien pregunta por hombro en el chat, esta es la lectura a la que apunta. Guardar es local y, con Firebase, se sincroniza en article_states.</p></aside>
+      </section>
+
+      <section class="slide shot pair" data-title="Perfil">
+        <div>
+          <div class="kicker">Perfil</div>
+          <h2>El cuerpo, el descanso y la sesión.</h2>
+          <p class="lead"><span class="fn">ProfileViewModel</span> actualiza foto, medidas y objetivo. El descanso de 90 s es <span class="fn">setRestSeconds</span>. El interruptor es <span class="fn">setReminders</span>. Cerrar sesión llama <span class="fn">signOut</span>.</p>
+          <p class="cap">La meta diaria que muestra el perfil es 2610 kcal y 120 g de proteína.</p>
+        </div>
+        <div class="phones">
+          <img src="capturas/19-perfil.png" alt="Perfil de Frida" />
+          <img src="capturas/20-ajustes.png" alt="Ajustes, recordatorios y cerrar sesión" />
+        </div>
+        <aside class="notes"><h4>Guión · puente a datos</h4><p>Esta lámina enseña el perfil editable. Todavía no hay publicaciones: aparecen al terminar una rutina y compartir la foto. La sesión dice cuenta local. Usa este teléfono cuando hables de privacidad en el bloque 14.</p></aside>
+      </section>
+
+      <section class="slide" data-title="Arquitectura">
+        <div class="kicker">12 · Arquitectura</div>
+        <h2>Una dirección. Un módulo.</h2>
+        <p class="lead">Estado unidireccional: el repositorio expone Flow, el ViewModel lo reduce a StateFlow, Compose lo recoge con <span class="fn">collectAsStateWithLifecycle</span>.</p>
+        <div class="wide">
+          <div class="layer"><b>ui</b> 14 ViewModels y las pantallas de las capturas. Navegación en FormaApp, Destinations y FormaBottomBar.</div>
+          <div class="layer aqua"><b>domain</b> Modelos puros y 8 interfaces: Auth, Profile, Training, Nutrition, Community, Learn, Chat, Ai.</div>
+          <div class="layer orange"><b>data</b> Room, DataStore, catálogos, generadores, repositorios Room-first y la nube.</div>
+          <div class="layer violet"><b>di</b> DatabaseModule, AiModule, AuthModule, RepositoryModule, CloudModule.</div>
+          <div class="layer magenta"><b>designsystem + core</b> FormaTheme, componentes, FormaImage e ImageStore.persist.</div>
+        </div>
+        <p class="muted wide">76 archivos Kotlin · cerca de 13 800 líneas · JDK 17 · minSdk 26 · compileSdk 35.</p>
+        <aside class="notes"><h4>Guión · bloque 12 · 50 s</h4><p>La UI de las fotos no habla con Firestore ni con el catálogo. Habla con interfaces. Cambiar la IA o la auth es un binding.</p></aside>
+      </section>
+
+      <section class="slide" data-title="Funciones">
+        <div class="kicker">13 · Funciones que usamos</div>
+        <h2>El mapa, por capa.</h2>
+        <div class="grid-2 wide">
+          <article class="card">
+            <h3>Repositorios</h3>
+            <p><span class="fn">AuthRepository</span> entrar, crear cuenta, Google, salir.</p>
+            <p><span class="fn">ProfileRepository</span> current, save, updatePhoto.</p>
+            <p><span class="fn">TrainingRepository</span> weeklyRoutine, setExerciseCompleted, finishWorkout.</p>
+            <p><span class="fn">NutritionRepository</span> dayPlan, chooseOption, setPlatePhoto.</p>
+            <p><span class="fn">CommunityRepository</span> feed, toggleLike, react, publish.</p>
+            <p><span class="fn">ChatRepository</span> send · <span class="fn">AiRepository</span> answer.</p>
+          </article>
+          <article class="card">
+            <h3>Motor y datos</h3>
+            <p><span class="fn">RoutineGenerator.generate</span> siete días, solo equipo marcado.</p>
+            <p><span class="fn">MealPlanGenerator.optionsFor</span> cinco recetas por comida.</p>
+            <p><span class="fn">LocalCoach.answer</span> dieciséis intenciones con el peso real.</p>
+            <p><span class="fn">FormaCloudStore</span> pull y upsert. <span class="fn dim">NoOpCloudStore</span> si no hay Firebase.</p>
+            <p><span class="fn">UserProfile.dailyCalories</span> Mifflin–St Jeor × actividad + calorieShift.</p>
+          </article>
+        </div>
+        <aside class="notes"><h4>Guión · bloque 13 · 60 s</h4><p>Lee solo los verbos que la persona siente: entrar, guardar perfil, marcar ejercicio, elegir comida, publicar, preguntar. El resto está en el reporte.</p></aside>
+      </section>
+
+      <section class="slide" data-title="Datos">
+        <div class="kicker">14 · Datos y privacidad</div>
+        <h2>Room manda. La nube acompaña.</h2>
+        <div class="grid-2 wide">
+          <article class="card">
+            <h3>Ocho tablas</h3>
+            <p>Perfil, ejercicios marcados, sesiones, comidas, autores, posts, chat y artículos guardados. <span class="fn">FormaPreferences</span> guarda la sesión local, los segundos de descanso y los recordatorios que se ven en Ajustes.</p>
+          </article>
+          <article class="card">
+            <h3>Contrato remoto</h3>
+            <p><span class="fn">CloudSyncManager</span> hace pull al entrar y push en cada guardado. <span class="fn">isOwner</span> cierra <span class="mono">users/{uid}</span>. El feed de posts es lo público. <span class="fn">ImageStore.persist</span> copia la foto al teléfono.</p>
+          </article>
+        </div>
+        <p class="wide">En las capturas, Cerrar sesión y «Autenticación: Cuenta local» son este camino sin <span class="mono">google-services.json</span>.</p>
+        <aside class="notes"><h4>Guión · bloque 14 · 45 s</h4><p>Sin Firebase la app es offline de verdad. Con el archivo, Room sigue siendo la caché y la UI no cambia. Vuelve un segundo a la captura de ajustes si quieres mostrar la cuenta local.</p></aside>
+      </section>
+
+      <section class="slide" data-title="Calidad">
+        <div class="kicker">15 · Calidad y stack</div>
+        <h2>Lo que ya está probado.</h2>
+        <div class="grid-2 wide">
+          <article class="card">
+            <table>
+              <thead><tr><th>Prueba</th><th>Qué fija</th></tr></thead>
+              <tbody>
+                <tr><td>RoutineGeneratorTest</td><td>7 días, determinismo, equipo permitido, un plan por deporte</td></tr>
+                <tr><td>MealPlanGeneratorTest</td><td>5 opciones, meta calórica, rotación, gustos</td></tr>
+                <tr><td>LocalCoachTest</td><td>Usa el peso real, ignora acentos, nunca responde vacío</td></tr>
+                <tr><td>NoOpCloudStoreTest</td><td>La nube apagada no rompe el contrato</td></tr>
+              </tbody>
+            </table>
+          </article>
+          <article class="card">
+            <h3>Versiones</h3>
+            <p>Kotlin 2.0.21 · Compose BOM 2024.12 · Hilt 2.52 · Room 2.6.1 · Firebase BOM 33.7. Release con minify. El comando es <span class="mono">./gradlew test</span>.</p>
+            <p style="margin-top:10px">La propiedad que importa: el mismo perfil devuelve el mismo plan. Por eso la semana de hombro de Frida se puede repetir.</p>
+          </article>
+        </div>
+        <aside class="notes"><h4>Guión · bloque 15 · 40 s</h4><p>No recites versiones. Di que las pruebas fijan el determinismo. El comando es ./gradlew test.</p></aside>
+      </section>
+
+      <section class="slide shot" data-title="Cierre">
+        <div>
+          <div class="kicker">16 · Cierre</div>
+          <h2>FORMA ya se puede abrir, usar y explicar.</h2>
+          <div class="stack" style="margin-top:12px">
+            <article class="card"><h3>Abrir</h3><p>Android Studio, JDK 17, API 26+. <span class="mono">./gradlew installDebug</span></p></article>
+            <article class="card"><h3>Encender la nube</h3><p><span class="mono">google-services.json</span> y las reglas de <span class="mono">firebase/</span>.</p></article>
+            <article class="card"><h3>Encender el modelo</h3><p>Ata <span class="mono">RemoteAiRepository</span> y define <span class="mono">FORMA_AI_API_KEY</span>.</p></article>
+          </div>
+          <p class="lead" style="margin-top:14px">Un perfil. Una semana. Un plato. Una comunidad breve. Un coach que contesta aunque el mundo esté offline.</p>
+        </div>
+        <div class="phones"><img src="capturas/19-perfil.png" alt="Perfil de Frida González" /></div>
+        <aside class="notes"><h4>Guión · bloque 16 · 30 s</h4><p>Cierra con Frida en pantalla. Repite la tesis: el plan es una función del perfil. El guión completo no cambia; esta versión solo sustituye el laboratorio por las capturas.</p></aside>
+      </section>
+    </main>
+
+    <footer class="chrome bottom">
+      <div class="legend">Misma información y el mismo guión, con las capturas de la app</div>
+      <div class="arrows">
+        <button class="arrow" id="prev" type="button" aria-label="Anterior">←</button>
+        <button class="arrow" id="next" type="button" aria-label="Siguiente">→</button>
+      </div>
+    </footer>
+    <div class="progress"><span id="bar"></span></div>
+  </div>
+  <div class="overview" id="overview"><div class="overview-grid" id="overview-grid"></div></div>
+  <script src="presentacion.js"></script>
+</body>
+</html>

@@ -84,9 +84,13 @@ function renderWeek() {
   const reps = goal === "lose_fat" || goal === "endurance" ? "12-15 reps · descanso corto" : "compuesto en 6-8 · descanso hasta 120 s";
   document.getElementById("week-note").textContent = `toExercise aplicaría: ${reps}. Semilla estable mientras no cambie el perfil.`;
 }
-document.getElementById("level").onchange = renderWeek;
-document.getElementById("goal").onchange = renderWeek;
-renderWeek();
+const levelSelect = document.getElementById("level");
+const goalSelect = document.getElementById("goal");
+if (levelSelect && goalSelect && document.getElementById("week")) {
+  levelSelect.onchange = renderWeek;
+  goalSelect.onchange = renderWeek;
+  renderWeek();
+}
 
 const athlete = () => ({
   age: Number(document.getElementById("age").value),
@@ -122,10 +126,12 @@ function renderDiet() {
     .map(([name, share]) => `${name} ${Math.round(m.kcal * share)} kcal`)
     .join(" · ");
 }
-["weight", "height", "age"].forEach((id) => document.getElementById(id).oninput = renderDiet);
-document.getElementById("level").addEventListener("change", renderDiet);
-document.getElementById("goal").addEventListener("change", renderDiet);
-renderDiet();
+if (document.getElementById("weight")) {
+  ["weight", "height", "age"].forEach((id) => document.getElementById(id).oninput = renderDiet);
+  levelSelect?.addEventListener("change", renderDiet);
+  goalSelect?.addEventListener("change", renderDiet);
+  renderDiet();
+}
 
 function coachAnswer(question) {
   const p = athlete();
@@ -165,6 +171,7 @@ function coachAnswer(question) {
 }
 
 const chat = document.getElementById("chat");
+if (chat) {
 function pushBubble(kind, text) {
   const div = document.createElement("div");
   div.className = `bubble ${kind}`;
@@ -191,6 +198,7 @@ document.getElementById("q").addEventListener("keydown", (event) => {
   document.getElementById("suggestions").appendChild(button);
 });
 pushBubble("bot", "Soy el coach local de esta presentación. Uso el peso de Dieta y el objetivo elegido en Rutina.");
+}
 
 const layers = {
   "Arranque": [
@@ -246,6 +254,7 @@ const layers = {
 
 const tabBar = document.getElementById("layer-tabs");
 const layerBody = document.getElementById("layer-body");
+if (tabBar && layerBody) {
 function renderLayer(name) {
   [...tabBar.children].forEach((button) => button.classList.toggle("on", button.textContent === name));
   layerBody.innerHTML = `<table><tbody>${layers[name].map(([fn, desc]) =>
@@ -260,6 +269,7 @@ Object.keys(layers).forEach((name) => {
   tabBar.appendChild(button);
 });
 renderLayer("Repositorios");
+}
 
 const initial = Number((location.hash || "").replace("#", ""));
 if (initial >= 1 && initial <= slides.length) show(initial - 1);

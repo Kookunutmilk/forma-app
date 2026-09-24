@@ -1,0 +1,50 @@
+.slide.shot.active,
+.slide.shot.pair.active {
+  display: grid;
+  grid-template-columns: 1.02fr 0.98fr;
+  align-items: center;
+  gap: 22px;
+}
+.slide.shot.pair.active { grid-template-columns: 0.78fr 1.22fr; }
+.slide.shot h2 { font-size: clamp(30px, 3.4vw, 46px); max-width: 16ch; }
+.slide.shot .lead { font-size: 16px; }
+.phones {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 14px;
+  min-width: 0;
+}
+.phones img {
+  height: min(62vh, 560px);
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.45));
+}
+.slide.shot.pair .phones img { height: min(58vh, 520px); }
+.cap {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+@media print {
+  .slide.shot,
+  .slide.shot.pair {
+    display: grid !important;
+    grid-template-columns: 1.02fr 0.98fr !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 14px !important;
+  }
+  .slide.shot.pair { grid-template-columns: 0.72fr 1.28fr !important; }
+  .slide.shot h2 { font-size: 32px; margin-bottom: 8px; }
+  .slide.shot .lead, .slide.shot p { font-size: 13.5px; }
+  .slide.shot .card { padding: 10px 12px; }
+  .slide.shot .card p, .slide.shot .card h3 { font-size: 13px; }
+  .phones { gap: 10px; }
+  .phones img { height: 5.55in; filter: none; }
+  .slide.shot.pair .phones img { height: 5.35in; }
+  .cap { font-size: 11px; }
+}

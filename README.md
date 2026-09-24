@@ -83,6 +83,7 @@ Pasos completos (proyecto, reglas, esquema): ver [`firebase/README.md`](firebase
 Los PDF están en [`docs/presentacion/pdf/`](docs/presentacion/pdf/):
 
 - [FORMA-presentacion.pdf](docs/presentacion/pdf/FORMA-presentacion.pdf) — 16 diapositivas, una por página.
+- [FORMA-presentacion-con-capturas.pdf](docs/presentacion/pdf/FORMA-presentacion-con-capturas.pdf) — el mismo relato, con las pantallas de la app.
 - [FORMA-guion.pdf](docs/presentacion/pdf/FORMA-guion.pdf) — qué decir en cada diapositiva.
 - [FORMA-reporte.pdf](docs/presentacion/pdf/FORMA-reporte.pdf) — funciones, motor, datos y pruebas.
 
