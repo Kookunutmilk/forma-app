@@ -73,3 +73,16 @@ th { color: var(--soft); font-size: 12px; letter-spacing: 0.08em; text-transform
 ul { padding-left: 18px; }
 li { margin: 4px 0; }
 footer { color: var(--soft); font-size: 13px; margin-top: 28px; }
+
+@media print {
+  @page { size: A4; margin: 16mm 16mm 18mm; }
+  header.top { position: static; background: #070908; }
+  html, body {
+    background: #070908;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  main { max-width: none; padding: 0 0 12mm; }
+  a { text-decoration: none; }
+  h2, h3, .beat, .card { break-inside: avoid; }
+}

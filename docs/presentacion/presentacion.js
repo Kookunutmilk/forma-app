@@ -78,8 +78,8 @@ function renderWeek() {
     titles[5] = level === "advanced" ? "Volumen + cardio" : "Full body y cardio";
   }
   const counts = { beginner: [5, 4, 5, 0, 5, 4, 0], intermediate: [4, 4, 5, 4, 5, 4, 0], advanced: [6, 6, 6, 6, 6, 6, 0] }[level];
-  document.getElementById("week").innerHTML = `<div class="grid-4">${titles.map((title, i) =>
-    `<div class="step" style="grid-template-columns:36px 1fr"><b>${days[i][0]}</b><div>${title}<small>${counts[i] ? counts[i] + " ejercicios" : "recuperación"}</small></div></div>`
+  document.getElementById("week").innerHTML = `<div class="week-row">${titles.map((title, i) =>
+    `<div><b>${days[i]}</b><span>${title}</span><small>${counts[i] ? counts[i] + " ej." : "libre"}</small></div>`
   ).join("")}</div>`;
   const reps = goal === "lose_fat" || goal === "endurance" ? "12-15 reps · descanso corto" : "compuesto en 6-8 · descanso hasta 120 s";
   document.getElementById("week-note").textContent = `toExercise aplicaría: ${reps}. Semilla estable mientras no cambie el perfil.`;

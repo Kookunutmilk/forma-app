@@ -80,7 +80,13 @@ Pasos completos (proyecto, reglas, esquema): ver [`firebase/README.md`](firebase
 
 ## Presentación, guión y reporte
 
-En [`docs/presentacion/`](docs/presentacion/index.html) hay una presentación navegable del proyecto (flechas, notas con `N`, índice con `O`), el [guión](docs/presentacion/guion.html) para quien la expone y el [reporte técnico](docs/presentacion/reporte.html) con las funciones, el motor y el modelo de datos. Ábrelos en el navegador; la presentación incluye un laboratorio en vivo de la rutina, las calorías y el coach.
+Los PDF están en [`docs/presentacion/pdf/`](docs/presentacion/pdf/):
+
+- [FORMA-presentacion.pdf](docs/presentacion/pdf/FORMA-presentacion.pdf) — 16 diapositivas, una por página.
+- [FORMA-guion.pdf](docs/presentacion/pdf/FORMA-guion.pdf) — qué decir en cada diapositiva.
+- [FORMA-reporte.pdf](docs/presentacion/pdf/FORMA-reporte.pdf) — funciones, motor, datos y pruebas.
+
+Las mismas piezas se pueden abrir en el navegador desde [`docs/presentacion/`](docs/presentacion/index.html) (flechas, notas con `N`, índice con `O`). La versión web incluye un laboratorio en vivo de la rutina, las calorías y el coach.
 
 ## Cómo abrirlo en Android Studio
 

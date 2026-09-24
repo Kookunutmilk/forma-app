@@ -373,6 +373,22 @@ td code, .mono { font-family: var(--mono); font-size: 12px; color: #e7f7b0; }
 .ph-card { margin-top: 10px; background: var(--lime-soft); border-radius: 14px; padding: 10px; }
 .ph-card b { display: block; }
 
+.week-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+.week-row div {
+  background: #10140f;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 8px 6px;
+  min-height: 78px;
+}
+.week-row b { display: block; color: var(--lime); font-size: 11px; letter-spacing: 0.04em; }
+.week-row span { display: block; font-size: 12px; line-height: 1.25; margin-top: 4px; }
+.week-row small { display: block; color: var(--muted); font-size: 10px; margin-top: 4px; }
+
 .legend { font-size: 12px; color: var(--soft); }
 kbd {
   font-family: var(--mono);
@@ -440,6 +456,64 @@ body.overview-on .overview { display: block; }
 .layer.orange { border-color: var(--orange); }
 .layer.violet { border-color: var(--violet); }
 .layer.magenta { border-color: var(--magenta); }
+
+@media print {
+  @page { size: 13.333in 7.5in; margin: 0; }
+  html, body {
+    height: auto;
+    overflow: visible;
+    background: #070908;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .chrome, .progress, .overview, .notes { display: none !important; }
+  .deck, .viewport { height: auto; position: static; overflow: visible; }
+  .slide {
+    display: flex !important;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    inset: auto;
+    width: 13.333in;
+    height: 7.5in;
+    margin: 0;
+    padding: 0.48in 0.62in 0.58in;
+    overflow: hidden;
+    page-break-after: always;
+    break-after: page;
+    animation: none !important;
+    background:
+      radial-gradient(900px 420px at 92% -8%, rgba(203, 244, 63, 0.16), transparent 55%),
+      #070908;
+  }
+  .slide:last-of-type { page-break-after: auto; break-after: auto; }
+  .slide::after {
+    content: "FORMA   ·   " attr(data-title);
+    position: absolute;
+    left: 0.62in;
+    bottom: 0.22in;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #8a90a0;
+  }
+  h1 { font-size: 68px; }
+  h2 { font-size: 38px; margin-bottom: 10px; }
+  .lead { font-size: 16px; }
+  .kicker { margin-bottom: 8px; }
+  .wide { margin-top: 14px; }
+  .card { box-shadow: none; padding: 12px 14px; }
+  .card .num { font-size: 28px; }
+  .hero { min-height: 0; align-items: center; }
+  .orbit { width: 280px; }
+  .phone { transform: scale(0.92); transform-origin: top right; }
+  .chat-log { min-height: 0; max-height: 88px; }
+  .split { gap: 16px; }
+  .week-row div { min-height: 0; padding: 6px 5px; }
+  .week-row span { font-size: 11px; }
+  #q, #ask { display: none !important; }
+}
 
 @media (max-width: 980px) {
   .slide { padding: 84px 20px 110px; }
