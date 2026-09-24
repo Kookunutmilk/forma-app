@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FORMA — Reporte técnico</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@380;560;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="lectura.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="brand">FORMA · REPORTE</div>
+    <nav>
+      <a href="pdf/FORMA-reporte.pdf">PDF</a>
+      <a href="index.html">Presentación</a>
+      <a href="guion.html">Guión</a>
+      <a href="#indice">Índice</a>
+    </nav>
+  </header>
+  <main>
+    <div class="kicker">Reporte técnico · versión 1.0.0</div>
+    <h1>FORMA, explicada desde el código.</h1>
+    <p class="lead">Aplicación Android nativa de entrenamiento y nutrición personalizada. Este reporte describe el producto, las funciones que lo implementan, la arquitectura, el modelo de datos, el motor de personalización y las pruebas que fijan su comportamiento.</p>
+
+    <div class="toc" id="indice">
+      <a href="#resumen">1. Resumen</a>
+      <a href="#producto">2. Producto</a>
+      <a href="#recorrido">3. Recorrido y pantallas</a>
+      <a href="#motor">4. Motor de personalización</a>
+      <a href="#funciones">5. Mapa de funciones</a>
+      <a href="#arquitectura">6. Arquitectura</a>
+      <a href="#datos">7. Datos, nube y privacidad</a>
+      <a href="#diseno">8. Sistema de diseño</a>
+      <a href="#calidad">9. Stack y pruebas</a>
+      <a href="#decisiones">10. Decisiones y límites</a>
+    </div>
+
+    <h2 id="resumen">1. Resumen</h2>
+    <p>FORMA arma una rutina semanal y un plan de comidas a partir de un <code>UserProfile</code>: deporte, nivel, objetivo, equipo disponible y alimentos preferidos. Acompaña la sesión con checks y un cronómetro de descanso, permite cerrarla con una foto, ofrece un feed de comunidad con reacciones y un catálogo de artículos, y responde preguntas con un asistente que usa los datos del perfil.</p>
+    <p>El módulo único <code>:app</code> sigue MVVM con flujo unidireccional. Hay 76 archivos Kotlin y cerca de 13 800 líneas. La interfaz está en español. La aplicación arranca en Android 8.0 (API 26), compila con SDK 35 y usa JDK 17.</p>
+    <div class="card">
+      <table>
+        <thead><tr><th>Pieza</th><th>Dónde vive</th><th>Qué garantiza</th></tr></thead>
+        <tbody>
+          <tr><td>Rutina</td><td><code>RoutineGenerator.generate</code></td><td>Siete días. En gym, solo equipo marcado. Misma semilla, mismo plan.</td></tr>
+          <tr><td>Dieta</td><td><code>MealPlanGenerator.optionsFor</code></td><td>Cinco opciones por comida, sesgadas al gusto y a la meta calórica.</td></tr>
+          <tr><td>Coach</td><td><code>LocalCoach.answer</code></td><td>Dieciséis intenciones. Respuestas con peso, IMC y calorías reales.</td></tr>
+          <tr><td>Memoria</td><td>Room + DataStore</td><td>La app funciona sin Firebase.</td></tr>
+          <tr><td>Nube</td><td><code>FormaCloudStore</code></td><td>Contrato único. NoOp o Firestore/Storage.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="producto">2. Producto</h2>
+    <h3>Deportes, equipo y alimentos</h3>
+    <p>El enum <code>Sport</code> define ocho disciplinas: gym, yoga, running, pilates, ciclismo, natación, CrossFit y boxeo. Cada una trae título y subtítulo propios para la pantalla de equipo. <code>EquipmentCatalog.groupsFor</code> devuelve los grupos de ese deporte. El catálogo suma 117 <code>EquipmentItem</code>. <code>defaultSelection</code>, <code>allIds</code> y <code>labelFor</code> cubren la selección inicial, el “marcar todo” y las etiquetas.</p>
+    <p><code>ExperienceLevel</code> tiene principiante, intermedio y avanzado. <code>Goal</code> tiene bajar grasa (−350 kcal), ganar músculo (+300), mantenerse (0) y más resistencia (+150). Esos enteros se llaman <code>calorieShift</code>.</p>
+    <p><code>IngredientCatalog</code> lista 63 alimentos en siete categorías: proteína, carbohidratos, fibra y verduras, grasas, frutas, lácteos y snacks. <code>name</code> resuelve un id a su nombre visible. <code>defaultSelection</code> propone un conjunto inicial para el onboarding.</p>
+
+    <h3>Identidad del atleta</h3>
+    <p><code>UserProfile</code> guarda id, nombre, correo, foto, edad, peso, estatura, deporte, nivel, objetivo, equipo, ingredientes y la bandera de onboarding. Las propiedades calculadas son el contrato nutricional de la app:</p>
+    <ul>
+      <li><code>bmi</code> — peso dividido entre estatura en metros al cuadrado, redondeado a un decimal.</li>
+      <li><code>bmiLabel</code> — Bajo por debajo de 18.5, Normal hasta 25, Alto hasta 30, Muy alto después.</li>
+      <li><code>firstName</code> — primera palabra del nombre, o “atleta”.</li>
+      <li><code>dailyCalories</code> — Mifflin–St Jeor con factor de actividad y <code>calorieShift</code>, redondeado a 10 kcal.</li>
+      <li><code>proteinTargetG</code> — 2.0 g/kg para músculo, 2.2 g/kg para bajar grasa, 1.7 g/kg en el resto.</li>
+    </ul>
+    <p>La fórmula calórica, tal como está en el modelo:</p>
+    <div class="card"><code>base = 10·kg + 6.25·cm − 5·edad + 5</code><br /><code>actividad = 1.375 | 1.55 | 1.725 según el nivel</code><br /><code>kcal = redondear((base · actividad + calorieShift) / 10) · 10</code></div>
+    <p>Los factores de actividad corresponden a una persona ligeramente activa, moderadamente activa y muy activa. El modelo usa el nivel de entrenamiento como proxy de esa actividad.</p>
+
+    <h2 id="recorrido">3. Recorrido y pantallas</h2>
+    <h3>Puerta de entrada</h3>
+    <p><code>MainActivity</code> instala <code>FormaTheme</code> y compone <code>FormaApp</code>. <code>RootViewModel</code> publica un <code>RootState</code> sellado: <code>Loading</code>, <code>NeedsAuth</code>, <code>NeedsOnboarding</code> o <code>Ready</code>. En pantallas anchas el contenido se limita a 600 dp (<code>MaxContentWidth</code>) para que las líneas no se estiren.</p>
+    <p><code>AuthViewModel</code> alterna entre entrar y crear cuenta (<code>toggleMode</code>), recoge nombre, correo y contraseña, y dispara <code>submit</code> o <code>signInWithGoogle</code>. La validación de la implementación local vive en <code>LocalAuthRepository</code>.</p>
+    <p>El onboarding tiene cinco pasos en <code>OnboardingUiState.totalSteps</code>. <code>canContinue</code> exige nombre de al menos dos caracteres en el paso 0, equipo no vacío en el paso 3 y al menos tres ingredientes en el paso 4. <code>next</code> avanza o, en el último paso, llama <code>ProfileRepository.save</code>. <code>onSport</code> reinicia el equipo. <code>selectAllEquipment</code> y <code>clearEquipment</code> operan sobre el deporte actual.</p>
+
+    <h3>Navegación</h3>
+    <p>El objeto <code>Routes</code> declara las rutas. <code>bottomTabs</code> construye la barra con iconos outlined y rounded de Material. <code>FormaBottomBar</code> solo se muestra cuando la ruta actual es una pestaña, con animación de fade y slide. <code>navigateToTab</code> hace <code>popUpTo(HOME)</code> con <code>saveState</code>, <code>launchSingleTop</code> y <code>restoreState</code>.</p>
+    <p>Rutas con argumentos: <code>recipe/{recipeId}/{dayIndex}/{slotId}</code>, <code>article/{articleId}</code> y <code>finish/{dayIndex}</code>. También existen perfil, notificaciones e ingredientes.</p>
+
+    <h3>Inicio</h3>
+    <p><code>HomeViewModel</code> combina cuatro flujos: perfil, <code>stats()</code>, <code>recommended()</code> y la sesión de hoy. <code>todayWeekDay</code> resta 2 al <code>DAY_OF_WEEK</code> de <code>Calendar</code> para alinear domingo con el índice de <code>WeekDay</code>. <code>greeting</code> parte el día en 5–11, 12–18 y el resto. <code>TrainingStats</code> expone entrenos de la semana, racha, kcal y días completados. <code>unreadNotifications</code> es un indicador derivado de si ya hay sesiones guardadas. La pantalla compone saludo, tira semanal, métricas, tarjeta del entreno, IMC, accesos y teasers de artículos (<code>HomeContent</code>, <code>WeekStrip</code>, <code>TodayCard</code>, <code>ProfileCard</code>, <code>ArticleTeaser</code>).</p>
+
+    <h3>Rutina</h3>
+    <p><code>RoutineViewModel.load</code> observa el perfil y pide <code>weeklyRoutine</code>. El estado <code>Content</code> calcula <code>doneCount</code>, <code>progress</code> y <code>allDone</code> con la clave <code>exerciseKey(day, exerciseId)</code>, que es <code>"índice|id"</code>. <code>selectDay</code> cambia el día y cancela el timer. <code>toggleExercise</code> persiste el check y, si queda completado, llama <code>startTimer</code> con los segundos de descanso del ejercicio. El timer es una corrutina que descuenta cada 1000 ms hasta publicar <code>running = false</code>. <code>resetDay</code> limpia los logs de ese día.</p>
+    <p><code>FinishWorkoutViewModel</code> recoge foto, pie de foto y la decisión de compartir. <code>save</code> construye una <code>WorkoutSession</code> y, si corresponde, publica en la comunidad. La UI ofrece <code>ShareToggle</code>.</p>
+    <p>Una <code>RoutineSession</code> trae día, título corto, título, foco, ejercicios, minutos estimados, kcal estimadas y <code>isRest</code>. Cada <code>Exercise</code> tiene id, nombre, músculo, series, repeticiones, descanso, tip y equipo.</p>
+
+    <h3>Dieta</h3>
+    <p><code>DayMealPlan</code> agrupa cuatro <code>MealOptions</code>. Cada opción tiene la receta elegida, las alternativas y una foto de plato opcional. Los totales del día suman kcal y macros de lo seleccionado. <code>MealSlot</code> fija hora y fracción calórica: desayuno 7:00 y 0.26, almuerzo 13:00 y 0.36, snack 16:00 y 0.12, cena 19:30 y 0.26.</p>
+    <p><code>DietViewModel</code> recarga el plan, cambia de día, abre el abanico de alternativas y confirma una receta con <code>chooseOption</code>. <code>RecipeDetailViewModel.onPlatePhoto</code> y <code>NutritionRepository.setPlatePhoto</code> guardan la imagen. <code>IngredientsViewModel</code> edita el conjunto de alimentos preferidos después del onboarding. La UI desglosa macros con <code>MacroColumn</code> y <code>MacroTile</code>, usando lima para proteína, aqua para carbohidratos y naranja para grasa.</p>
+
+    <h3>Comunidad</h3>
+    <p><code>Post</code> referencia un <code>Author</code>, imagen, pie, deporte, tiempo, likes y un mapa de reacciones. <code>Reaction</code> enumera fuego, fuerza, aplauso, amor e imparable. No existe un modelo de comentario.</p>
+    <p><code>CommunityRepository.feed</code> filtra por deporte. <code>toggleLike</code>, <code>react</code> y <code>toggleFollow</code> actualizan el estado local y, si la nube está activa, el engagement. <code>publish</code> crea el post. <code>myPosts</code> alimenta el perfil. <code>syncMeWithProfile</code> copia nombre, foto y deporte al autor propio. <code>CommunitySeed</code> inserta 8 autores y 8 publicaciones si el feed está vacío. <code>relativeTime</code> traduce el timestamp a una frase relativa en la UI.</p>
+
+    <h3>Asistente y aprendizaje</h3>
+    <p><code>AiViewModel</code> expone el hilo, el texto en curso y las preguntas sugeridas. <code>send</code> delega en <code>ChatRepository.send</code>, que persiste el mensaje del usuario, pide <code>AiRepository.answer</code> y persiste la respuesta. <code>clear</code> vacía el historial.</p>
+    <p><code>Article</code> tiene categoría, minutos, resumen, secciones, imagen y banderas de destacado y guardado. Las categorías son técnica, nutrición, lesiones, recuperación y mentalidad. Hay 10 artículos en <code>ArticleCatalog</code>. <code>LearnViewModel</code> filtra, busca y alterna la vista de guardados. <code>ArticleViewModel.toggleSaved</code> persiste el estado. Inicio consume <code>recommended</code>.</p>
+
+    <h3>Perfil</h3>
+    <p><code>ProfileViewModel</code> actualiza foto, medidas y objetivo, configura los segundos de descanso (<code>setRestSeconds</code>), activa recordatorios y cierra sesión. La pantalla muestra publicaciones propias y un editor corporal con <code>Stepper</code>.</p>
+
+    <h2 id="motor">4. Motor de personalización</h2>
+    <h3>Rutina de gym</h3>
+    <p><code>RoutineGenerator.generate</code> bifurca: si el deporte es gym, construye sesiones con el catálogo de máquinas; si no, delega en <code>SportSessionTemplates.sessions</code>. La semilla es:</p>
+    <div class="card"><code>id.hashCode · 31  ⊕  equipo ordenado  ⊕  nivel·7  ⊕  objetivo·13</code></div>
+    <p>Esa semilla, más el índice del día, alimenta <code>Random</code> al barajar cada grupo muscular. El mismo perfil ve la misma semana hasta que cambia su id, su equipo, su nivel o su objetivo.</p>
+    <p><code>gymPlan</code> define el split:</p>
+    <table>
+      <thead><tr><th>Nivel</th><th>Días de trabajo</th><th>Ejercicios por día de trabajo</th><th>Descanso</th></tr></thead>
+      <tbody>
+        <tr><td>Principiante</td><td>Full A, cardio, tren superior, tren inferior, core</td><td>5, 4, 5, 5, 4</td><td>Jueves y domingo</td></tr>
+        <tr><td>Intermedio</td><td>Pecho, espalda, pierna, hombro, brazo, full body</td><td>4, 4, 5, 4, 5, 4</td><td>Domingo</td></tr>
+        <tr><td>Avanzado</td><td>Empuje, tracción, pierna, hombro, brazo, volumen</td><td>6 en cada día de trabajo</td><td>Domingo</td></tr>
+      </tbody>
+    </table>
+    <p>Si el objetivo es bajar grasa o resistencia, el sábado sustituye un grupo por cardio. <code>pickExercises</code> reparte cupos entre los grupos del día, sin repetir id, y se detiene si una ronda no agrega nada. <code>GymExerciseCatalog.available</code> filtra por <code>requires</code>. El catálogo tiene 60 ejercicios. Si el filtro deja el grupo vacío, entran las variantes sin equipo.</p>
+    <p><code>toExercise</code> prescribe así:</p>
+    <ul>
+      <li>Series: 3 en principiante; 4 o 3 en intermedio según sea compuesto; 5 o 4 en avanzado. El primer ejercicio del día es el compuesto.</li>
+      <li>Repeticiones: rango alto del catálogo si el objetivo es grasa o resistencia, o si la persona es principiante. Rango bajo en compuestos de intermedio y avanzado. Rango medio en el resto.</li>
+      <li>Descanso: 90/45 s si el objetivo es bajar grasa; 120 s en compuestos; 60 s en principiante; 90 s en el resto.</li>
+    </ul>
+    <p>Los minutos estimados son la suma de series por 3, más 10. Las kcal estimadas son minutos por 8.5. Un día de descanso publica sesión vacía con <code>isRest</code>.</p>
+    <p>Las plantillas de los otros deportes viven en <code>SportSessionTemplates</code>, con funciones <code>running</code>, <code>yoga</code>, <code>pilates</code>, <code>cycling</code>, <code>swimming</code>, <code>crossfit</code> y <code>boxing</code>, más auxiliares <code>drill</code>, <code>rest</code> y <code>volumeFactor</code>.</p>
+
+    <h3>Plan de comidas</h3>
+    <p><code>RecipeCatalog</code> reúne 57 recetas entre desayunos, almuerzos, snacks, cenas y opciones más contundentes. Cada <code>Recipe</code> trae kcal, proteína, carbohidratos, grasa, minutos, ingredientes con cantidad y pasos. <code>bySlot</code> las agrupa. <code>byId</code> las busca.</p>
+    <p><code>optionsFor</code> crea un <code>Random</code> con <code>profile.id.hashCode xor (day.index * 977)</code>. Para cada slot calcula la meta como <code>dailyCalories * share</code> y puntúa cada receta:</p>
+    <div class="card"><code>cobertura = ingredientes favoritos / ingredientes de la receta</code><br /><code>penalización = |kcal − meta del slot| / meta del slot</code><br /><code>score = cobertura · 1.5 − penalización · 1.3 + jitter</code><br /><code>jitter = random.nextDouble() · 0.12</code></div>
+    <p>Toma las 10 mejores, las rota según el día y se queda con 5. Ordena esas cinco por cercanía calórica para que la primera —la seleccionada por defecto— no deje el día corto. Si el catálogo de un slot tuviera menos de cinco, rellena con el resto del pool sin duplicar.</p>
+
+    <h3>Coach local y coach remoto</h3>
+    <p><code>LocalAiRepository</code> implementa <code>AiRepository</code> con el nombre de proveedor «FORMA local». Inserta una latencia simbólica —220 ms en rutina, 180 ms en comidas, 600 ms en chat— para que los estados de carga de la UI sean reales, y delega en los generadores y en <code>LocalCoach</code>.</p>
+    <p><code>LocalCoach.answer</code> normaliza a minúsculas y quita acentos. Elige la intención cuya lista de palabras aparece más veces. Las dieciséis intenciones cubren proteína, sentadilla, preentreno, descanso, hombro, cardio, IMC, calorías, hidratación, creatina, sueño, agujetas, rutina del día, pérdida de grasa, ganancia muscular y dolor articular. Varias ramifican con <code>Goal</code> o con la ausencia de perfil. El fallback saluda por <code>firstName</code>, recuerda deporte, nivel y objetivo, y recomienda un artículo elegido con una semilla derivada del hash de la pregunta, de modo que la misma pregunta apunta al mismo artículo.</p>
+    <p><code>suggestedQuestions</code> ofrece seis arranques que la pantalla de IA muestra como chips.</p>
+    <p><code>RemoteAiRepository</code> reutiliza el motor local para <code>generateWeeklyRoutine</code> y <code>generateDayMeals</code>. <code>answer</code> llama a <code>requestCompletion</code> solo si <code>BuildConfig.AI_API_KEY</code> no está vacía. El cliente OkHttp espera 15 s de conexión y 45 s de lectura. El cuerpo es JSON de chat completions con temperatura 0.6, un mensaje de sistema construido con el perfil y el historial reciente. Si la llamada lanza, el <code>runCatching</code> vuelve a <code>LocalAiRepository.answer</code>. Las constantes salen de <code>local.properties</code> o del entorno: <code>FORMA_AI_API_KEY</code>, <code>FORMA_AI_BASE_URL</code> (por defecto la API de OpenAI v1) y <code>FORMA_AI_MODEL</code> (por defecto gpt-4o-mini). Activarlo exige cambiar el <code>@Binds</code> de <code>AiModule</code>.</p>
+
+    <h2 id="funciones">5. Mapa de funciones</h2>
+    <p>Lista de las funciones y métodos que sostienen el producto, agrupados por el lugar donde se invocan o se implementan.</p>
+
+    <h3>Dominio — interfaces</h3>
+    <table>
+      <thead><tr><th>Contrato</th><th>Operaciones</th></tr></thead>
+      <tbody>
+        <tr><td><code>AuthRepository</code></td><td><code>signInWithEmail</code>, <code>signUpWithEmail</code>, <code>signInWithGoogle</code>, <code>signOut</code>, flujo <code>currentUser</code></td></tr>
+        <tr><td><code>ProfileRepository</code></td><td><code>current</code>, <code>save</code>, <code>updatePhoto</code>, <code>clear</code>, flujo <code>profile</code></td></tr>
+        <tr><td><code>TrainingRepository</code></td><td><code>weeklyRoutine</code>, <code>setExerciseCompleted</code>, <code>resetDay</code>, <code>finishWorkout</code>, flujos de claves, sesiones y <code>stats</code></td></tr>
+        <tr><td><code>NutritionRepository</code></td><td><code>dayPlan</code>, <code>chooseOption</code>, <code>setPlatePhoto</code>, <code>ingredientCatalog</code>, <code>choicesChanged</code></td></tr>
+        <tr><td><code>CommunityRepository</code></td><td><code>feed</code>, <code>myPosts</code>, <code>followingCount</code>, <code>toggleLike</code>, <code>react</code>, <code>toggleFollow</code>, <code>publish</code>, <code>syncMeWithProfile</code></td></tr>
+        <tr><td><code>LearnRepository</code></td><td><code>articles</code>, <code>article</code>, <code>recommended</code>, <code>toggleSaved</code></td></tr>
+        <tr><td><code>ChatRepository</code></td><td><code>messages</code>, <code>send</code>, <code>clear</code>, <code>suggestedQuestions</code></td></tr>
+        <tr><td><code>AiRepository</code></td><td><code>generateWeeklyRoutine</code>, <code>generateDayMeals</code>, <code>answer</code>, <code>providerName</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3>ViewModels</h3>
+    <table>
+      <thead><tr><th>Clase</th><th>Funciones públicas</th></tr></thead>
+      <tbody>
+        <tr><td><code>AuthViewModel</code></td><td><code>toggleMode</code>, <code>onName</code>, <code>onEmail</code>, <code>onPassword</code>, <code>submit</code>, <code>signInWithGoogle</code></td></tr>
+        <tr><td><code>OnboardingViewModel</code></td><td><code>prefill</code>, <code>onName</code>, <code>onPhoto</code>, <code>onAge</code>, <code>onWeight</code>, <code>onHeight</code>, <code>onGoal</code>, <code>onLevel</code>, <code>onSport</code>, <code>toggleEquipment</code>, <code>selectAllEquipment</code>, <code>clearEquipment</code>, <code>toggleIngredient</code>, <code>back</code>, <code>next</code></td></tr>
+        <tr><td><code>HomeViewModel</code></td><td><code>retry</code>. Auxiliares de archivo: <code>todayWeekDay</code>, <code>greeting</code></td></tr>
+        <tr><td><code>RoutineViewModel</code></td><td><code>selectDay</code>, <code>toggleExercise</code>, <code>resetDay</code>, <code>startTimer</code>, <code>stopTimer</code>, <code>retry</code></td></tr>
+        <tr><td><code>FinishWorkoutViewModel</code></td><td><code>onPhoto</code>, <code>onCaption</code>, <code>toggleShare</code>, <code>save</code></td></tr>
+        <tr><td><code>DietViewModel</code></td><td><code>reload</code>, <code>selectDay</code>, <code>toggleOptions</code>, <code>chooseOption</code>, <code>retry</code></td></tr>
+        <tr><td><code>RecipeDetailViewModel</code></td><td><code>onPlatePhoto</code></td></tr>
+        <tr><td><code>IngredientsViewModel</code></td><td><code>toggle</code>, <code>save</code></td></tr>
+        <tr><td><code>CommunityViewModel</code></td><td><code>selectSport</code>, <code>toggleLike</code>, <code>openReactions</code>, <code>closeReactions</code>, <code>react</code>, <code>toggleFollow</code></td></tr>
+        <tr><td><code>AiViewModel</code></td><td><code>onInput</code>, <code>send</code>, <code>clear</code></td></tr>
+        <tr><td><code>LearnViewModel</code></td><td><code>selectCategory</code>, <code>onQueryChange</code>, <code>toggleOnlySaved</code>, <code>toggleSaved</code></td></tr>
+        <tr><td><code>ArticleViewModel</code></td><td><code>toggleSaved</code></td></tr>
+        <tr><td><code>ProfileViewModel</code></td><td><code>updatePhoto</code>, <code>updateBody</code>, <code>updateGoal</code>, <code>setRestSeconds</code>, <code>setReminders</code>, <code>signOut</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Generación, catálogos y nube</h3>
+    <table>
+      <thead><tr><th>Unidad</th><th>Funciones</th></tr></thead>
+      <tbody>
+        <tr><td><code>RoutineGenerator</code></td><td><code>generate</code>, <code>seedOf</code>, <code>gymSessions</code>, <code>gymPlan</code>, <code>pickExercises</code>, <code>toExercise</code></td></tr>
+        <tr><td><code>MealPlanGenerator</code></td><td><code>optionsFor</code>. Constantes <code>OPTIONS_PER_MEAL = 5</code> y pool de 10 candidatas</td></tr>
+        <tr><td><code>LocalCoach</code></td><td><code>answer</code>, <code>normalize</code>, <code>weightOf</code>, <code>fallback</code></td></tr>
+        <tr><td><code>RemoteAiRepository</code></td><td><code>answer</code>, <code>requestCompletion</code>, <code>buildMessages</code>, <code>systemPrompt</code></td></tr>
+        <tr><td><code>GymExerciseCatalog</code></td><td><code>available</code></td></tr>
+        <tr><td><code>EquipmentCatalog</code></td><td><code>groupsFor</code>, <code>allIds</code>, <code>defaultSelection</code>, <code>labelFor</code></td></tr>
+        <tr><td><code>RecipeCatalog</code></td><td><code>byId</code>, más los constructores internos de receta</td></tr>
+        <tr><td><code>ArticleCatalog</code></td><td><code>byId</code></td></tr>
+        <tr><td><code>IngredientCatalog</code></td><td><code>name</code></td></tr>
+        <tr><td><code>CommunitySeed</code></td><td><code>posts</code></td></tr>
+        <tr><td><code>SportSessionTemplates</code></td><td><code>sessions</code> y una función por deporte</td></tr>
+        <tr><td><code>FormaCloudStore</code></td><td><code>pullUserData</code>, <code>upsertProfile</code>, logs, sesiones, comidas, chat, artículos, <code>publishPost</code>, <code>updatePost</code>, engagement, follow, <code>pullCommunityFeed</code>, <code>uploadUserFile</code></td></tr>
+        <tr><td><code>CloudSyncManager</code></td><td><code>pullIfNeeded</code>, empuje de foto de perfil y de archivos locales</td></tr>
+        <tr><td><code>ImageStore</code></td><td><code>persist</code></td></tr>
+        <tr><td><code>FormaPreferences</code></td><td><code>saveUser</code>, <code>clearUser</code>, <code>setRestSeconds</code>, <code>setRemindersEnabled</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Sistema de diseño</h3>
+    <p>Los composables reutilizables están en <code>Components.kt</code>: <code>ScreenHeader</code>, <code>FormaCard</code>, <code>SectionTitle</code>, <code>FormaPill</code>, <code>FormaPillRow</code>, <code>PrimaryButton</code>, <code>SecondaryButton</code>, <code>StatTile</code>, <code>FormaAvatar</code>, <code>FormaTextField</code>, <code>FormaProgressBar</code>, <code>LoadingState</code>, <code>ErrorState</code>, <code>EmptyState</code>, <code>QuickActionCard</code>, <code>ListRowChevron</code>, <code>ConfirmationDialog</code> y <code>TagChip</code>. <code>FormaImage</code> y <code>artworkFor</code> resuelven ilustraciones de catálogo y fotos del usuario. <code>FormaTheme</code> aplica el esquema oscuro.</p>
+
+    <h2 id="arquitectura">6. Arquitectura</h2>
+    <p>Paquetes bajo <code>com.forma.app</code>:</p>
+    <ul>
+      <li><code>core</code> — persistencia de imágenes elegidas por la persona.</li>
+      <li><code>designsystem</code> — color, tipo, tema, imagen y componentes.</li>
+      <li><code>domain.model</code> y <code>domain.repository</code> — modelos sin Android y contratos.</li>
+      <li><code>data.local</code> — Room y DataStore.</li>
+      <li><code>data.catalog</code> — contenido en español.</li>
+      <li><code>data.ai</code> — motores local y remoto.</li>
+      <li><code>data.repository</code> — implementaciones Room-first.</li>
+      <li><code>data.remote</code> — contrato de nube, NoOp, Firebase y sincronización.</li>
+      <li><code>di</code> — módulos Hilt.</li>
+      <li><code>ui</code> — una carpeta por superficie, más navegación y <code>FormaApp</code>.</li>
+    </ul>
+    <p>El patrón es unidireccional. Un repositorio expone <code>Flow</code>. El ViewModel lo combina en un <code>StateFlow</code> con <code>stateIn</code> y <code>SharingStarted.WhileSubscribed(5_000)</code>. La pantalla recoge con <code>collectAsStateWithLifecycle</code>. Los eventos de UI son funciones del ViewModel que lanzan corrutinas en <code>viewModelScope</code>. Los estados de carga y error son tipos sellados (<code>HomeUiState</code>, <code>RoutineUiState</code>) o banderas dentro del data class.</p>
+    <p>Hilt está instalado en <code>SingletonComponent</code>. <code>DatabaseModule</code> construye <code>FormaDatabase</code> con <code>fallbackToDestructiveMigration</code> y provee los seis DAO más <code>FormaPreferences</code>. <code>RepositoryModule</code> ata las seis implementaciones de producto. <code>AiModule</code> ata <code>LocalAiRepository</code>. <code>AuthModule</code> elige auth con <code>Lazy</code> para no construir Firebase si no hace falta. <code>CloudModule</code> elige <code>NoOpCloudStore</code> o <code>FirebaseCloudStore</code> con el mismo criterio. El plugin de Google Services solo se aplica si existe <code>app/google-services.json</code>; si no, el proyecto compila igual.</p>
+    <p><code>FormaApplication</code> arranca Hilt. KSP genera Room en Kotlin y escribe el esquema en <code>app/schemas</code>.</p>
+
+    <h2 id="datos">7. Datos, nube y privacidad</h2>
+    <p>Entidades Room:</p>
+    <table>
+      <thead><tr><th>Entidad</th><th>Rol</th></tr></thead>
+      <tbody>
+        <tr><td><code>UserProfileEntity</code></td><td>Perfil único. <code>toDomain</code> / <code>toEntity</code> traducen al modelo.</td></tr>
+        <tr><td><code>ExerciseLogEntity</code></td><td>Check de un ejercicio en un día.</td></tr>
+        <tr><td><code>WorkoutSessionEntity</code></td><td>Sesión terminada: duración, kcal, foto, nota.</td></tr>
+        <tr><td><code>MealChoiceEntity</code></td><td>Receta elegida y foto de plato por día y slot.</td></tr>
+        <tr><td><code>AuthorEntity</code> / <code>PostEntity</code></td><td>Feed, reacciones serializadas y follows.</td></tr>
+        <tr><td><code>ChatMessageEntity</code></td><td>Historial del asistente.</td></tr>
+        <tr><td><code>ArticleStateEntity</code></td><td>Artículos guardados.</td></tr>
+      </tbody>
+    </table>
+    <p>Los DAO correspondientes ofrecen observación con <code>Flow</code>, lecturas suspendidas, <code>upsert</code> y borrados por día o totales. <code>Converters</code> serializa listas de strings. <code>FormaPreferences</code> guarda en DataStore la sesión de la auth local y los ajustes de descanso y recordatorios.</p>
+    <p>Con Firebase, el esquema remoto es:</p>
+    <ul>
+      <li><code>users/{uid}</code> — perfil.</li>
+      <li><code>users/{uid}/exercise_logs</code>, <code>workout_sessions</code>, <code>meal_choices</code>, <code>chat_messages</code>, <code>article_states</code>, <code>following</code>, <code>engagement</code>.</li>
+      <li><code>posts/{postId}</code> — feed público.</li>
+      <li><code>authors/{authorId}</code> — fichas públicas.</li>
+      <li>Storage en <code>users/{uid}/{profile|workouts|plates|posts}/</code>.</li>
+    </ul>
+    <p>Las reglas de Firestore definen <code>signedIn</code> e <code>isOwner</code>. Todo lo que cuelga de <code>users/{uid}</code> exige que el uid autenticado coincida. <code>CloudSyncManager</code> hace pull al iniciar sesión y push en cada escritura de repositorio. Las fotos locales se suben y la URL https reemplaza la ruta interna. Sin el json de servicios, <code>NoOpCloudStore.isEnabled</code> es falso y ninguna de esas llamadas sale del teléfono.</p>
+    <p><code>ImageStore.persist</code> copia el URI elegido por la persona al almacenamiento interno de la app, para que la foto sobreviva aunque el proveedor de contenido original la retire.</p>
+
+    <h2 id="diseno">8. Sistema de diseño</h2>
+    <p>El tema es oscuro con acento lima <code>#CBF43F</code> sobre fondo <code>#0B0D0C</code>. Superficies en <code>#15181B</code> y <code>#1E2227</code>. Texto principal <code>#F4F6F3</code>, texto secundario <code>#8A90A0</code>. Acentos de apoyo: aqua <code>#5BC8FF</code>, naranja <code>#FF9A4D</code>, magenta <code>#FF6FA5</code>, violeta <code>#A78BFA</code> y peligro <code>#FF6B6B</code>. Esos mismos tintes separan los macronutrientes.</p>
+    <p><code>FormaTypography</code> usa una sans del sistema con pesos Black en display (40, 32 y 26 sp) y una escala compacta para cuerpo y labels. El tracking negativo en los títulos grandes es parte de la voz visual: deportiva, corta, con mucho aire negro.</p>
+    <p>La presentación de este reporte reutiliza esa paleta a propósito, para que explicar el producto se sienta como usar el producto.</p>
+
+    <h2 id="calidad">9. Stack y pruebas</h2>
+    <table>
+      <thead><tr><th>Capa</th><th>Versión en el catálogo</th></tr></thead>
+      <tbody>
+        <tr><td>Android Gradle Plugin</td><td>8.7.3</td></tr>
+        <tr><td>Kotlin / KSP</td><td>2.0.21 / 2.0.21-1.0.28</td></tr>
+        <tr><td>Compose BOM</td><td>2024.12.01</td></tr>
+        <tr><td>Hilt</td><td>2.52, navegación 1.2.0</td></tr>
+        <tr><td>Navigation Compose</td><td>2.8.5</td></tr>
+        <tr><td>Room</td><td>2.6.1</td></tr>
+        <tr><td>DataStore</td><td>1.1.1</td></tr>
+        <tr><td>Coil / OkHttp</td><td>2.7.0 / 4.12.0</td></tr>
+        <tr><td>Coroutines</td><td>1.9.0</td></tr>
+        <tr><td>Firebase BOM</td><td>33.7.0</td></tr>
+        <tr><td>Serialization</td><td>1.7.3</td></tr>
+      </tbody>
+    </table>
+    <p>Release activa minify y shrink con las reglas de <code>proguard-rules.pro</code>. El version catalog vive en <code>gradle/libs.versions.toml</code>. El wrapper trae Gradle 8.11.1.</p>
+    <p>Pruebas unitarias, 15 casos con nombres en español:</p>
+    <ul>
+      <li><code>RoutineGeneratorTest</code> — la semana tiene siete días distintos; el mismo perfil produce la misma rutina; cada día de entreno trae ejercicios, minutos y kcal; el gym solo usa equipo marcado; cada deporte genera su propia rutina.</li>
+      <li><code>MealPlanGeneratorTest</code> — cinco opciones sin repetir; la selección por defecto se acerca a la meta; el plan cambia entre días; el mismo perfil y día son estables; se priorizan ingredientes que gustan.</li>
+      <li><code>LocalCoachTest</code> — la proteína usa el peso real; la respuesta ignora acentos; nunca vuelve vacía; funciona sin perfil; el consejo de proteína cambia si el objetivo es bajar grasa.</li>
+      <li><code>NoOpCloudStoreTest</code> — el contrato remoto apagado se cumple.</li>
+    </ul>
+    <p>Comandos: <code>./gradlew test</code>, <code>./gradlew assembleDebug</code>, <code>./gradlew installDebug</code>. Si el SDK no está en la ruta por defecto, <code>local.properties</code> lleva <code>sdk.dir</code>.</p>
+
+    <h2 id="decisiones">10. Decisiones y límites</h2>
+    <h3>Decisiones que conviene defender</h3>
+    <ul>
+      <li><strong>Determinismo antes que un modelo generativo opaco.</strong> La rutina y la dieta salen de catálogos reales. Se pueden repetir en una prueba y se pueden explicar en una diapositiva.</li>
+      <li><strong>Una interfaz de IA.</strong> La UI nunca importa OkHttp ni el coach. Cambiar de proveedor es un binding.</li>
+      <li><strong>Room como fuente de la interfaz.</strong> La nube es una réplica. Quitar Firebase no abre un segundo producto.</li>
+      <li><strong>Comunidad sin comentarios.</strong> El reconocimiento cabe en cinco reacciones. El modelo no reserva un hilo.</li>
+      <li><strong>Equipo como filtro duro.</strong> Un ejercicio de gym cuyo <code>requires</code> no está marcado no entra en la sesión.</li>
+      <li><strong>Español en el contenido, no solo en los strings.</strong> Artículos, tips, recetas y respuestas del coach están escritos en el idioma de la interfaz.</li>
+    </ul>
+    <h3>Límites actuales</h3>
+    <ul>
+      <li>El chat remoto no genera todavía rutinas ni menús en JSON. Esas dos salidas siguen en el motor local a propósito, para no aceptar un ejercicio inventado.</li>
+      <li>La migración de Room es destructiva. El esquema está en la versión 1.</li>
+      <li>El IMC y las calorías son orientaciones de producto. El coach lo dice cuando hablan de IMC: no distingue músculo de grasa y no diagnostica.</li>
+      <li>Las notificaciones de Inicio son un contador derivado, no un canal push.</li>
+      <li>La semilla de comunidad es contenido de demostración para que el feed no nazca vacío.</li>
+    </ul>
+    <h3>Cómo encender lo opcional</h3>
+    <p>Firebase: colocar <code>app/google-services.json</code>, activar Auth, Firestore y Storage, y desplegar <code>firebase/firestore.rules</code> junto con <code>firebase/storage.rules</code>. IA remota: definir las tres propiedades <code>FORMA_AI_*</code> y cambiar el binding de <code>AiModule</code> a <code>RemoteAiRepository</code>.</p>
+
+    <div class="card">
+      <strong>Cierre</strong>
+      <p>FORMA es una función del perfil, dibujada como una app. El perfil entra por cinco pasos, se guarda en Room, alimenta tres motores deterministas y se reparte en seis pestañas. Cada gesto de la interfaz tiene una función con nombre. Este reporte es el índice de esos nombres.</p>
+    </div>
+    <footer>Acompaña a la <a href="index.html">presentación</a> y al <a href="guion.html">guión</a>. Cifras contadas sobre el código de la versión 1.0.0: 8 deportes, 60 ejercicios, 57 recetas, 63 ingredientes, 117 piezas de equipo, 10 artículos, 8 autores semilla, 16 intenciones del coach, 76 archivos Kotlin.</footer>
+  </main>
+</body>
+</html>

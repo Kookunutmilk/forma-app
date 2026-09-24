@@ -78,6 +78,17 @@ Con `google-services.json` en `app/`:
 
 Pasos completos (proyecto, reglas, esquema): ver [`firebase/README.md`](firebase/README.md).
 
+## Presentación, guión y reporte
+
+Los PDF están en [`docs/presentacion/pdf/`](docs/presentacion/pdf/):
+
+- [FORMA-presentacion.pdf](docs/presentacion/pdf/FORMA-presentacion.pdf) — 16 diapositivas, una por página.
+- [FORMA-presentacion-con-capturas.pdf](docs/presentacion/pdf/FORMA-presentacion-con-capturas.pdf) — el mismo relato, con las pantallas de la app.
+- [FORMA-guion.pdf](docs/presentacion/pdf/FORMA-guion.pdf) — qué decir en cada diapositiva.
+- [FORMA-reporte.pdf](docs/presentacion/pdf/FORMA-reporte.pdf) — funciones, motor, datos y pruebas.
+
+Las mismas piezas se pueden abrir en el navegador desde [`docs/presentacion/`](docs/presentacion/index.html) (flechas, notas con `N`, índice con `O`). La versión web incluye un laboratorio en vivo de la rutina, las calorías y el coach.
+
 ## Cómo abrirlo en Android Studio
 
 1. Necesitas Android Studio Ladybug (2024.2) o posterior y JDK 17.
